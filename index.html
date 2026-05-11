@@ -769,33 +769,24 @@ const adminOverview=[
 ];
 
 // ── Respuestas de familias — persiste en localStorage + Firebase ──
-let familyResponses=(()=>{try{return JSON.parse(localStorage.getItem('lef_responses')||'[]');}catch(e){return[];}})();
-function saveResponses(){try{localStorage.setItem('lef_responses',JSON.stringify(familyResponses));}catch(e){}}
+let familyResponses=[];
+function saveResponses(){} // datos en Firebase, no localStorage
 
 async function cargarRespuestasFirebase(){
   try{
     const res=await fetch(FB_URL+'/respuestas.json');
     const data=await res.json();
-    if(!data)return;
-    const fbResps=Object.values(data).map(r=>({
+    if(!data){familyResponses=[];return;}
+    familyResponses=Object.values(data).map(r=>({
       student:r.nombre||'',family:r.nombre||'',
-      grade:r.grado||'',section:r.seccion||'',
+      grade:String(r.grado||''),section:r.seccion||'',
       text:r.texto||'',week:r.semana||'',
       submittedAt:r.fecha||'',
       textId:r.textId||r.texto||'',
-      answers:[r.respuesta1||'',r.respuesta2||'',r.respuesta3||'',r.respuesta4||'',r.respuesta5||''].filter((_,i)=>i<5),
+      answers:[r.respuesta1||'',r.respuesta2||'',r.respuesta3||'',r.respuesta4||'',r.respuesta5||''],
       questions:[],audioUrls:[],readingAudioUrl:null
     }));
-    // Merge: add Firebase responses not already in local
-    fbResps.forEach(fr=>{
-      const exists=familyResponses.some(lr=>
-        lr.student===fr.student&&lr.grade===fr.grade&&
-        lr.section===fr.section&&lr.text===fr.text&&lr.submittedAt===fr.submittedAt
-      );
-      if(!exists)familyResponses.push(fr);
-    });
-    saveResponses();
-  }catch(e){console.warn('Error cargando Firebase:',e);}
+  }catch(e){console.warn('Error cargando Firebase:',e);familyResponses=[];}
 }
 
 // ══════════════════ NAVIGATION ══════════════════
@@ -890,7 +881,7 @@ function renderTextList(){
   const tb={cuento:'badge-cuento',leyenda:'badge-leyenda',texto:'badge-texto',fabula:'badge-cuento',poema:'badge-leyenda'};
 
   list.innerHTML=arr.map((t,i)=>{
-    const resps=familyResponses.filter(r=>r.grade===currentGrade&&r.section===currentSection&&r.textId===t.id);
+    const resps=familyResponses.filter(r=>r.grade===currentGrade&&r.section===currentSection&&String(r.textId)===String(t.id)||r.text===t.title);
     const reviewed=resps.filter(r=>r.grade_minedu).length;
     const pending=resps.length-reviewed;
 
@@ -1241,23 +1232,13 @@ function submitAnswers(){
   const readingAudioUrl=readingAudioBlob?URL.createObjectURL(readingAudioBlob):null;
   const hasContent=answers.some(a=>a.length>0)||audioUrls.some(a=>a)||readingAudioUrl;
   if(!hasContent){toast('⚠️ Escribe, graba una respuesta o graba tu lectura antes de enviar','#E65100');return;}
-  const respuesta = {
-    family:currentStudentName, student:currentStudentName,
-    grade:currentGrade, section:currentSection,
-    textId:t.id, text:t.title, week:t.week,
-    submittedAt:new Date().toLocaleDateString('es-PE'),
-    fecha:new Date().toISOString(),
-    answers, audioUrls:t.questions.map(()=>null), readingAudioUrl:null,
-    questions:t.questions
-  };
-  familyResponses.push(respuesta);
-  saveResponses();
   // Guardar en Firebase
   guardarEnFirebase({
     nombre: currentStudentName,
     grado: currentGrade,
     seccion: currentSection,
     texto: t.title,
+    textId: t.id,
     semana: t.week||'',
     fecha: new Date().toLocaleDateString('es-PE'),
     respuesta1: answers[0]||'',
