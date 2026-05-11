@@ -768,9 +768,35 @@ const adminOverview=[
   {grade:'6',section:'E',teacher:'Elizabeth'},
 ];
 
-// ── Respuestas de familias — persiste en localStorage ──
-const familyResponses=(()=>{try{return JSON.parse(localStorage.getItem('lef_responses')||'[]');}catch(e){return[];}})();
+// ── Respuestas de familias — persiste en localStorage + Firebase ──
+let familyResponses=(()=>{try{return JSON.parse(localStorage.getItem('lef_responses')||'[]');}catch(e){return[];}})();
 function saveResponses(){try{localStorage.setItem('lef_responses',JSON.stringify(familyResponses));}catch(e){}}
+
+async function cargarRespuestasFirebase(){
+  try{
+    const res=await fetch(FB_URL+'/respuestas.json');
+    const data=await res.json();
+    if(!data)return;
+    const fbResps=Object.values(data).map(r=>({
+      student:r.nombre||'',family:r.nombre||'',
+      grade:r.grado||'',section:r.seccion||'',
+      text:r.texto||'',week:r.semana||'',
+      submittedAt:r.fecha||'',
+      textId:r.textId||r.texto||'',
+      answers:[r.respuesta1||'',r.respuesta2||'',r.respuesta3||'',r.respuesta4||'',r.respuesta5||''].filter((_,i)=>i<5),
+      questions:[],audioUrls:[],readingAudioUrl:null
+    }));
+    // Merge: add Firebase responses not already in local
+    fbResps.forEach(fr=>{
+      const exists=familyResponses.some(lr=>
+        lr.student===fr.student&&lr.grade===fr.grade&&
+        lr.section===fr.section&&lr.text===fr.text&&lr.submittedAt===fr.submittedAt
+      );
+      if(!exists)familyResponses.push(fr);
+    });
+    saveResponses();
+  }catch(e){console.warn('Error cargando Firebase:',e);}
+}
 
 // ══════════════════ NAVIGATION ══════════════════
 function showScreen(name){
@@ -830,6 +856,7 @@ function doLogin(){
 
 // ══════════════════ TEACHER ══════════════════
 function showTeacherDash(){
+  cargarRespuestasFirebase().then(()=>renderTextList());
   document.getElementById('teacher-dash-badge').textContent=`📚 Grado ${currentGrade}° · Sección ${currentSection}`;
   document.getElementById('teacher-topbar-info').innerHTML=`<strong>${currentGrade}° · ${currentSection}</strong>`;
   const now=new Date(),y=now.getFullYear(),w=getWeek(now);
@@ -1250,14 +1277,16 @@ function submitAnswers(){
 
 // ══════════════════ ADMIN ══════════════════
 function showAdminScreen(){
-  renderAdminStats();
-  renderChartByClassroom();
-  renderChartByGrade();
-  renderAdminTabs();
-  renderAdminTable('all');
-  renderPasswordTable();
-  renderFamilyResponses();
-  renderStudentsList();
+  cargarRespuestasFirebase().then(()=>{
+    renderAdminStats();
+    renderChartByClassroom();
+    renderChartByGrade();
+    renderAdminTabs();
+    renderAdminTable('all');
+    renderPasswordTable();
+    renderFamilyResponses();
+    renderStudentsList();
+  });
 }
 
 function renderAdminStats(){
@@ -2206,7 +2235,7 @@ function injectAIButtons(){
 const _origToggle=toggleSubmissions;
 function toggleSubmissions(id,btn){
   _origToggle(id,btn);
-  setTimeout(injectAIButtons,100);
+  try{setTimeout(injectAIButtons,100);}catch(e){}
 }
 
 // ══════════════════════════════════════════════════════
