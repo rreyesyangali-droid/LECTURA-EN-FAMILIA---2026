@@ -1158,6 +1158,44 @@ function renderReadingContent(cid){
       </div>
     </div>`;
 }
+// ══════════════════ FIREBASE REALTIME DATABASE ══════════════════
+const FB_URL = 'https://lectura-en-familia---2026-default-rtdb.firebaseio.com';
+
+async function guardarEnFirebase(datos){
+  try{
+    const res = await fetch(`${FB_URL}/respuestas.json`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(datos)
+    });
+    if(!res.ok) throw new Error('Error Firebase');
+  } catch(e){
+    console.warn('Firebase error:',e);
+  }
+}
+
+async function guardarEstudianteFirebase(estudiante){
+  try{
+    const key = `${estudiante.grade}_${estudiante.section}_${estudiante.name.replace(/\s+/g,'_')}`;
+    await fetch(`${FB_URL}/estudiantes/${key}.json`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(estudiante)
+    });
+  } catch(e){ console.warn('Firebase estudiante error:',e); }
+}
+
+async function guardarTextoFirebase(grade, section, texto){
+  try{
+    const key = `${grade}_${section}`;
+    await fetch(`${FB_URL}/textos/${key}/${texto.id}.json`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(texto)
+    });
+  } catch(e){ console.warn('Firebase texto error:',e); }
+}
+
 function submitAnswers(){
   if(!currentStudentName||currentStudentName==='Estudiante'){
     toast('⚠️ Por favor ingresa el nombre del estudiante antes de enviar','#E65100');
@@ -1176,15 +1214,31 @@ function submitAnswers(){
   const readingAudioUrl=readingAudioBlob?URL.createObjectURL(readingAudioBlob):null;
   const hasContent=answers.some(a=>a.length>0)||audioUrls.some(a=>a)||readingAudioUrl;
   if(!hasContent){toast('⚠️ Escribe, graba una respuesta o graba tu lectura antes de enviar','#E65100');return;}
-  familyResponses.push({
-    family:currentStudentName,student:currentStudentName,
-    grade:currentGrade,section:currentSection,
-    textId:t.id,text:t.title,week:t.week,
+  const respuesta = {
+    family:currentStudentName, student:currentStudentName,
+    grade:currentGrade, section:currentSection,
+    textId:t.id, text:t.title, week:t.week,
     submittedAt:new Date().toLocaleDateString('es-PE'),
-    answers,audioUrls:t.questions.map(()=>null),readingAudioUrl:null,
+    fecha:new Date().toISOString(),
+    answers, audioUrls:t.questions.map(()=>null), readingAudioUrl:null,
     questions:t.questions
-  });
+  };
+  familyResponses.push(respuesta);
   saveResponses();
+  // Guardar en Firebase
+  guardarEnFirebase({
+    nombre: currentStudentName,
+    grado: currentGrade,
+    seccion: currentSection,
+    texto: t.title,
+    semana: t.week||'',
+    fecha: new Date().toLocaleDateString('es-PE'),
+    respuesta1: answers[0]||'',
+    respuesta2: answers[1]||'',
+    respuesta3: answers[2]||'',
+    respuesta4: answers[3]||'',
+    respuesta5: answers[4]||''
+  });
   // Actualizar racha
   const newStreak=updateStreak(currentStudentName,currentGrade,currentSection,t.week||'');
   audioBlobs={};
