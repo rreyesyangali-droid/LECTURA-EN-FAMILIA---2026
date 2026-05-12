@@ -1,0 +1,3403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lectura en Familia 📖 v9</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FDF8F0;--warm-white:#FEFCF7;
+  --amber:#E8A020;--amber-light:#F5C842;--amber-dark:#C4821A;
+  --rust:#C0522A;--forest:#2D6A4F;--forest-light:#52B788;
+  --sky:#2196A8;--sky-light:#48CAE4;--plum:#6B3A6F;
+  --text-dark:#1A1008;--text-med:#4A3520;--text-light:#8A7060;
+  --shadow:rgba(60,30,10,.12);--shadow-deep:rgba(60,30,10,.22);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh;overflow-x:hidden;}
+
+.cursor-dot{width:8px;height:8px;background:var(--amber-dark);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+.cursor-ring{width:34px;height:34px;border:2px solid rgba(200,130,26,.45);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .2s,background .2s;}
+.cursor-ring.big{width:52px;height:52px;border-color:var(--amber);background:rgba(232,160,32,.06);}
+
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 15%,rgba(232,160,32,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 90% 80%,rgba(192,82,42,.07) 0%,transparent 60%);pointer-events:none;z-index:0;}
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.particle{position:absolute;animation:drift linear infinite;}
+@keyframes drift{0%{transform:translateY(100vh) rotate(0deg);opacity:0;}10%{opacity:.35;}90%{opacity:.15;}100%{transform:translateY(-100px) rotate(720deg);opacity:0;}}
+
+.screen{display:none;position:relative;z-index:1;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;animation:screenIn .5s ease both;}
+@keyframes screenIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+#screen-landing{align-items:center;justify-content:center;padding:40px 20px;text-align:center;}
+.hero-ornament{font-size:90px;margin-bottom:12px;display:inline-block;animation:floatBook 5s ease-in-out infinite;filter:drop-shadow(0 12px 22px rgba(200,130,26,.3));}
+@keyframes floatBook{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-16px) rotate(4deg);}}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,6vw,4.2rem);font-weight:900;color:var(--amber-dark);line-height:1.15;margin-bottom:10px;animation:fadeUp .7s .1s ease both;}
+.hero-title span{color:var(--rust);}
+.hero-sub{font-size:1.05rem;color:var(--text-light);font-weight:500;margin-bottom:50px;max-width:500px;animation:fadeUp .7s .25s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:660px;width:100%;margin-bottom:36px;animation:fadeUp .7s .4s ease both;}
+@media(max-width:560px){.role-grid{grid-template-columns:1fr;max-width:300px;}}
+.role-card{background:var(--warm-white);border-radius:28px;padding:36px 18px 30px;cursor:pointer;border:2px solid transparent;box-shadow:0 4px 20px var(--shadow);transition:all .35s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;isolation:isolate;}
+.role-card::after{content:'';position:absolute;top:-60%;left:-80%;width:55%;height:220%;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.6) 50%,transparent 60%);transform:skewX(-15deg);transition:left .55s ease;pointer-events:none;}
+.role-card:hover::after{left:150%;}
+.role-card::before{content:'';position:absolute;inset:-2px;border-radius:30px;opacity:0;transition:opacity .3s;z-index:-1;}
+.role-card.teacher::before{background:linear-gradient(135deg,rgba(45,106,79,.4),rgba(82,183,136,.15));}
+.role-card.parent::before{background:linear-gradient(135deg,rgba(232,160,32,.4),rgba(245,200,66,.15));}
+.role-card.admin::before{background:linear-gradient(135deg,rgba(107,58,111,.4),rgba(150,100,155,.15));}
+.role-card:hover{transform:translateY(-12px) scale(1.05);box-shadow:0 26px 52px var(--shadow-deep);}
+.role-card:hover::before{opacity:1;}
+.role-card:active{transform:translateY(-4px) scale(.99);}
+.role-card.teacher{border-color:rgba(45,106,79,.22);}
+.role-card.parent{border-color:rgba(232,160,32,.22);}
+.role-card.admin{border-color:rgba(107,58,111,.22);}
+.role-icon{font-size:52px;margin-bottom:14px;display:inline-block;transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
+.role-card:hover .role-icon{transform:scale(1.25) rotate(-8deg);}
+.role-name{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;margin-bottom:7px;}
+.role-card.teacher .role-name{color:var(--forest);}
+.role-card.parent .role-name{color:var(--amber-dark);}
+.role-card.admin .role-name{color:var(--plum);}
+.role-desc{font-size:.8rem;color:var(--text-light);line-height:1.55;}
+.footer-note{font-size:.78rem;color:var(--text-light);margin-top:16px;animation:fadeUp .7s .6s ease both;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:15px 28px;background:rgba(254,252,247,.93);backdrop-filter:blur(12px);box-shadow:0 2px 16px var(--shadow);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(232,160,32,.15);}
+.topbar-brand{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--amber-dark);display:flex;align-items:center;gap:8px;cursor:pointer;transition:transform .2s;}
+.topbar-brand:hover{transform:scale(1.05);}
+.topbar-brand span{color:var(--rust);}
+.topbar-info{font-size:.82rem;color:var(--text-light);text-align:right;}
+.topbar-info strong{color:var(--text-med);font-weight:700;}
+.back-btn{background:none;border:1.5px solid var(--amber);color:var(--amber-dark);padding:7px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;z-index:0;}
+.back-btn::after{content:'';position:absolute;inset:0;background:var(--amber);transform:scaleX(0);transform-origin:left;transition:transform .25s ease;z-index:-1;border-radius:50px;}
+.back-btn:hover{color:white;transform:scale(1.05);}
+.back-btn:hover::after{transform:scaleX(1);}
+
+#screen-login{align-items:center;justify-content:center;padding:40px 20px;}
+.login-box{background:var(--warm-white);border-radius:30px;padding:48px 40px;max-width:420px;width:100%;box-shadow:0 12px 50px var(--shadow-deep);text-align:center;animation:loginIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes loginIn{from{opacity:0;transform:scale(.88) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.login-icon{font-size:60px;margin-bottom:14px;display:block;animation:floatBook 5s ease-in-out infinite;}
+.login-title{font-family:'Playfair Display',serif;font-size:1.85rem;font-weight:700;margin-bottom:6px;}
+.login-subtitle{font-size:.9rem;color:var(--text-light);margin-bottom:32px;}
+.form-group{margin-bottom:20px;text-align:left;}
+.form-group label{display:block;font-weight:700;font-size:.82rem;color:var(--text-med);margin-bottom:7px;letter-spacing:.04em;text-transform:uppercase;}
+.form-group select,.form-group input{width:100%;padding:13px 16px;border:2px solid rgba(60,30,10,.1);border-radius:14px;font-family:'Nunito',sans-serif;font-size:.95rem;background:var(--cream);color:var(--text-dark);outline:none;appearance:none;transition:border-color .2s,box-shadow .2s,transform .15s;}
+.form-group select:focus,.form-group input:focus{border-color:var(--amber);box-shadow:0 0 0 4px rgba(232,160,32,.12);transform:translateY(-1px);}
+.btn-primary{width:100%;padding:15px;border:none;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);margin-top:8px;}
+.btn-primary:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 10px 28px var(--shadow-deep);}
+.btn-primary:active{transform:translateY(-1px) scale(.99);}
+.btn-green{background:linear-gradient(135deg,var(--forest),var(--forest-light));color:white;}
+.btn-amber{background:linear-gradient(135deg,var(--amber-dark),var(--amber-light));color:white;}
+.btn-plum{background:linear-gradient(135deg,var(--plum),#9B6AAF);color:white;}
+.btn-pdf{background:linear-gradient(135deg,#B71C1C,#E53935);color:white;display:inline-flex;align-items:center;gap:8px;width:auto;padding:13px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;border:none;transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+.btn-pdf:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 10px 24px rgba(183,28,28,.35);}
+
+.dash-hero{padding:36px 32px 32px;color:white;position:relative;overflow:hidden;}
+.dash-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.07) 0%,transparent 60%);pointer-events:none;}
+.teacher-hero{background:linear-gradient(135deg,#1B4332 0%,#2D6A4F 60%,#52B788 100%);}
+.parent-hero{background:linear-gradient(135deg,#7A4E10 0%,#C4821A 50%,#E8A020 100%);}
+.admin-hero{background:linear-gradient(135deg,#3A0D3F 0%,#6B3A6F 60%,#9B5AAF 100%);}
+.hero-emoji-bg{position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:80px;opacity:.18;animation:heroPulse 4s ease-in-out infinite;}
+@keyframes heroPulse{0%,100%{transform:translateY(-50%) scale(1) rotate(-5deg);}50%{transform:translateY(-54%) scale(1.1) rotate(5deg);}}
+.dash-welcome{font-size:.88rem;opacity:.75;margin-bottom:4px;}
+.dash-name{font-family:'Playfair Display',serif;font-size:1.85rem;font-weight:700;margin-bottom:10px;}
+.dash-badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:50px;padding:5px 16px;font-size:.82rem;font-weight:700;}
+
+.dash-content{padding:28px 24px;max-width:980px;margin:0 auto;}
+.section-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--text-dark);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+
+.upload-box{background:var(--warm-white);border:2px dashed rgba(45,106,79,.3);border-radius:22px;padding:30px;margin-bottom:32px;transition:border-color .25s,box-shadow .25s,transform .25s;}
+.upload-box:hover{border-color:var(--forest);box-shadow:0 6px 24px var(--shadow);transform:translateY(-2px);}
+.upload-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:520px){.upload-row{grid-template-columns:1fr;}}
+.text-area-group textarea{width:100%;padding:14px 16px;border:2px solid rgba(60,30,10,.1);border-radius:14px;font-family:'Nunito',sans-serif;font-size:.93rem;color:var(--text-dark);background:var(--cream);resize:vertical;min-height:120px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.text-area-group textarea:focus{border-color:var(--forest);box-shadow:0 0 0 4px rgba(45,106,79,.1);}
+.questions-section{margin-top:20px;}
+.question-row{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
+.question-row input{flex:1;padding:11px 14px;border:2px solid rgba(60,30,10,.1);border-radius:12px;font-family:'Nunito',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;background:var(--cream);}
+.question-row input:focus{border-color:var(--forest);}
+.btn-icon{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;}
+.btn-icon:hover{transform:scale(1.22) rotate(10deg);}
+.btn-del{background:#FDECEA;color:#C62828;}
+.btn-add{background:#E8F5E9;color:#2E7D32;width:auto;padding:8px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;display:inline-flex;align-items:center;gap:6px;}
+.btn-add:hover{background:var(--forest);color:white;transform:translateY(-2px);box-shadow:0 6px 16px rgba(45,106,79,.3);}
+
+.reading-card{background:var(--warm-white);border-radius:20px;padding:20px 22px;margin-bottom:14px;box-shadow:0 2px 10px var(--shadow);display:flex;gap:16px;align-items:flex-start;transition:all .3s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;}
+.reading-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--forest),var(--forest-light));border-radius:4px 0 0 4px;transform:scaleY(0);transform-origin:top;transition:transform .3s ease;}
+.reading-card:hover{transform:translateY(-5px) translateX(3px);box-shadow:0 14px 34px var(--shadow-deep);}
+.reading-card:hover::before{transform:scaleY(1);}
+.reading-type-badge{flex-shrink:0;width:50px;height:50px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+.reading-card:hover .reading-type-badge{transform:scale(1.18) rotate(-8deg);}
+.badge-cuento{background:#FFF3E0;}.badge-leyenda{background:#E8F5E9;}.badge-texto{background:#E3F2FD;}
+.reading-body{flex:1;min-width:0;}
+.reading-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--text-dark);margin-bottom:5px;}
+.reading-meta{font-size:.8rem;color:var(--text-light);margin-bottom:8px;}
+.reading-meta span{display:inline-block;background:var(--cream);border-radius:50px;padding:2px 10px;margin-right:6px;margin-bottom:4px;border:1px solid rgba(60,30,10,.08);transition:background .2s;}
+.reading-card:hover .reading-meta span{background:rgba(45,106,79,.08);}
+.reading-questions{font-size:.82rem;color:var(--forest);font-weight:600;}
+.reading-actions{display:flex;gap:8px;flex-shrink:0;}
+.btn-sm{padding:7px 14px;border-radius:50px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);}
+.btn-sm:hover{transform:translateY(-3px) scale(1.07);}
+.btn-edit{background:#FFF8E1;color:#E65100;border:1.5px solid #FFE082;}
+.btn-edit:hover{background:#E65100;color:white;border-color:#E65100;}
+.btn-delete{background:#FFEBEE;color:#C62828;border:1.5px solid #FFCDD2;}
+.btn-delete:hover{background:#C62828;color:white;border-color:#C62828;}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-bottom:28px;}
+.stat-card{background:var(--warm-white);border-radius:18px;padding:20px 16px;text-align:center;box-shadow:0 2px 10px var(--shadow);transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+.stat-card:hover{transform:translateY(-7px) scale(1.05);box-shadow:0 16px 36px var(--shadow-deep);}
+.stat-number{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;color:var(--plum);line-height:1;margin-bottom:4px;transition:transform .3s;}
+.stat-card:hover .stat-number{transform:scale(1.1);}
+.stat-label{font-size:.78rem;color:var(--text-light);font-weight:600;}
+
+.chart-box{background:var(--warm-white);border-radius:20px;padding:24px 26px;margin-bottom:22px;box-shadow:0 4px 20px var(--shadow);transition:box-shadow .3s,transform .3s;}
+.chart-box:hover{box-shadow:0 10px 32px var(--shadow-deep);transform:translateY(-2px);}
+.chart-box-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text-dark);margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+.chart-sub{font-size:.76rem;color:var(--text-light);margin-bottom:18px;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.bar-lbl{font-size:.79rem;font-weight:700;color:var(--text-med);width:54px;flex-shrink:0;text-align:right;}
+.bar-track{flex:1;height:26px;background:rgba(60,30,10,.07);border-radius:50px;overflow:hidden;position:relative;}
+.bar-fill{height:100%;border-radius:50px;position:relative;display:flex;align-items:center;padding-left:10px;transition:width 1.3s cubic-bezier(.22,1,.36,1);}
+.bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 50%,rgba(255,255,255,.18));border-radius:50px;pointer-events:none;}
+.bar-count{font-size:.72rem;font-weight:800;color:white;white-space:nowrap;position:relative;z-index:1;}
+.bc-0{background:#BDBDBD;}
+.bc-1{background:linear-gradient(90deg,#C62828,#EF5350);}
+.bc-2{background:linear-gradient(90deg,#E65100,#FF7043);}
+.bc-3{background:linear-gradient(90deg,#F9A825,#FFD54F);}
+.bc-4{background:linear-gradient(90deg,#2D6A4F,#52B788);}
+.goal-marker{position:absolute;right:0;top:0;bottom:0;width:3px;background:rgba(60,30,10,.25);border-radius:50px;}
+.legend-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:.73rem;}
+.legend-item{display:flex;align-items:center;gap:5px;color:var(--text-light);}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+.admin-table-wrap{background:var(--warm-white);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);margin-bottom:28px;}
+.admin-table{width:100%;border-collapse:collapse;font-size:.87rem;}
+.admin-table thead tr{background:linear-gradient(135deg,var(--plum),#9B6AAF);color:white;}
+.admin-table th{padding:13px 15px;text-align:left;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;}
+.admin-table td{padding:12px 15px;border-bottom:1px solid rgba(60,30,10,.06);color:var(--text-med);vertical-align:middle;}
+.admin-table tr:last-child td{border-bottom:none;}
+.admin-table tbody tr{transition:background .18s;}
+.admin-table tbody tr:hover td{background:rgba(107,58,111,.05);}
+.status-pill{display:inline-block;padding:3px 11px;border-radius:50px;font-size:.73rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;}
+.status-ok{background:#E8F5E9;color:#2E7D32;}.status-miss{background:#FFEBEE;color:#C62828;}
+
+.pass-table-wrap{background:var(--warm-white);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);margin-bottom:28px;}
+.pass-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+.pass-table thead tr{background:linear-gradient(135deg,#1B4332,var(--forest-light));color:white;}
+.pass-table th{padding:11px 14px;text-align:left;font-weight:700;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;}
+.pass-table td{padding:11px 14px;border-bottom:1px solid rgba(60,30,10,.06);color:var(--text-med);}
+.pass-table tr:last-child td{border-bottom:none;}
+.pass-table tbody tr:hover td{background:rgba(45,106,79,.04);}
+.pass-code{font-family:monospace;font-size:.88rem;font-weight:700;color:var(--forest);background:rgba(45,106,79,.08);padding:2px 8px;border-radius:6px;}
+
+.text-reader{background:var(--warm-white);border-radius:20px;padding:32px;margin-bottom:24px;box-shadow:0 4px 20px var(--shadow);border-left:5px solid var(--amber);line-height:1.85;font-size:1.05rem;color:var(--text-dark);transition:box-shadow .3s,transform .3s;}
+.text-reader:hover{box-shadow:0 12px 36px var(--shadow-deep);transform:translateY(-2px);}
+.text-reader .text-title{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--amber-dark);margin-bottom:6px;}
+.text-reader .text-type{font-size:.75rem;color:var(--text-light);margin-bottom:20px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;}
+.text-reader p{margin-bottom:14px;}
+.questions-box{background:var(--warm-white);border-radius:20px;padding:28px;box-shadow:0 4px 20px var(--shadow);border-left:5px solid var(--forest);transition:box-shadow .3s;}
+.questions-box:hover{box-shadow:0 12px 36px var(--shadow-deep);}
+.question-item{padding:16px;background:var(--cream);border-radius:14px;margin-bottom:14px;transition:transform .25s,box-shadow .25s;}
+.question-item:hover{transform:translateX(5px);box-shadow:0 4px 16px var(--shadow);}
+.question-item p{font-weight:700;color:var(--text-dark);margin-bottom:10px;font-size:.95rem;}
+.question-item textarea{width:100%;padding:12px 14px;border:2px solid rgba(60,30,10,.1);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.9rem;min-height:80px;resize:vertical;outline:none;background:white;transition:border-color .2s;}
+.question-item textarea:focus{border-color:var(--amber);}
+
+.week-tag{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:3px 10px;border-radius:50px;background:linear-gradient(135deg,var(--forest),var(--forest-light));color:white;display:inline-block;margin-bottom:10px;}
+.info-banner{background:linear-gradient(135deg,rgba(232,160,32,.1),rgba(245,200,66,.08));border:1px solid rgba(232,160,32,.25);border-radius:14px;padding:14px 18px;font-size:.85rem;color:var(--amber-dark);margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;transition:transform .2s,box-shadow .2s;}
+.info-banner:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(232,160,32,.15);}
+.tag-grade{display:inline-block;padding:3px 12px;border-radius:50px;font-size:.78rem;font-weight:700;background:rgba(33,150,168,.1);color:var(--sky);border:1px solid rgba(33,150,168,.2);margin-right:4px;}
+.empty-state{text-align:center;padding:50px 20px;color:var(--text-light);}
+.empty-state .empty-icon{font-size:60px;margin-bottom:14px;display:block;animation:floatBook 5s ease-in-out infinite;}
+.empty-state p{font-size:.95rem;line-height:1.6;}
+
+.tab-bar{display:flex;gap:6px;padding:4px;background:rgba(60,30,10,.06);border-radius:50px;margin-bottom:24px;flex-wrap:wrap;}
+.tab-btn{flex:1;min-width:56px;padding:9px 14px;border-radius:50px;border:none;background:transparent;font-family:'Nunito',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;color:var(--text-light);transition:all .25s cubic-bezier(.34,1.56,.64,1);text-align:center;}
+.tab-btn:hover{color:var(--text-dark);transform:translateY(-2px);}
+.tab-btn.active{background:var(--warm-white);color:var(--text-dark);box-shadow:0 2px 10px var(--shadow);transform:translateY(-1px);}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,16,8,.56);z-index:500;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--warm-white);border-radius:26px;padding:36px 32px;max-width:520px;width:100%;box-shadow:0 24px 70px rgba(26,16,8,.35);animation:modalIn .38s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;}
+@keyframes modalIn{from{opacity:0;transform:scale(.85) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:20px;color:var(--text-dark);display:flex;align-items:center;gap:10px;}
+.modal-actions{display:flex;gap:12px;margin-top:24px;justify-content:flex-end;}
+.btn-cancel{padding:11px 24px;border-radius:50px;border:2px solid rgba(60,30,10,.15);background:transparent;font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;color:var(--text-med);transition:all .2s;}
+.btn-cancel:hover{background:var(--cream);transform:scale(1.04);}
+.btn-confirm{padding:11px 28px;border-radius:50px;border:none;background:var(--rust);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:.9rem;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);}
+.btn-confirm:hover{background:#A0431C;transform:translateY(-3px) scale(1.04);}
+
+.toast-container{position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;}
+.toast{background:#1A1008;color:white;padding:14px 22px;border-radius:18px;font-size:.88rem;font-weight:600;box-shadow:0 10px 32px rgba(0,0,0,.3);animation:toastIn .45s cubic-bezier(.34,1.56,.64,1) forwards,toastOut .3s 2.7s ease-in forwards;display:flex;align-items:center;gap:10px;max-width:320px;}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px) scale(.85);}to{opacity:1;transform:translateX(0) scale(1);}}
+@keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateY(10px) scale(.9);}}
+
+.bc-empty{background:transparent;}
+.bar-empty-label{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.7rem;color:#aaa;font-style:italic;}
+
+/* ── Submission cards ── */
+.submission-card{background:var(--cream);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;border:1.5px solid rgba(60,30,10,.07);transition:box-shadow .2s,transform .2s;}
+.submission-card:hover{box-shadow:0 4px 16px var(--shadow);transform:translateX(3px);}
+.submission-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--forest-light));color:white;font-weight:800;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.submission-body{flex:1;min-width:0;}
+.submission-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:4px;}
+.submission-name{font-weight:800;font-size:.95rem;color:var(--text-dark);}
+.submission-date{font-size:.74rem;color:var(--text-light);}
+.submission-answers{margin-bottom:10px;}
+.submission-qa{margin-bottom:8px;}
+.submission-q{font-size:.78rem;font-weight:700;color:var(--text-med);margin-bottom:3px;}
+.submission-a{font-size:.85rem;color:var(--text-dark);background:white;border-radius:8px;padding:7px 10px;border:1px solid rgba(60,30,10,.07);line-height:1.5;}
+.submission-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;}
+
+/* ── MINEDU badge (given) ── */
+.minedu-badge-given{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:50px;border:1.5px solid;font-size:.8rem;flex-wrap:wrap;}
+.minedu-code{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:900;}
+.minedu-lbl{font-weight:700;}
+.minedu-comment{font-size:.74rem;font-style:italic;opacity:.8;width:100%;padding-top:2px;}
+
+/* ── Review button ── */
+.btn-review{background:linear-gradient(135deg,var(--forest),var(--forest-light));color:white;border:none;border-radius:50px;padding:8px 20px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);}
+.btn-review:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 6px 18px rgba(45,106,79,.35);}
+
+/* ── Submissions toggle ── */
+.submissions-toggle-btn{width:100%;display:flex;align-items:center;gap:8px;background:rgba(45,106,79,.05);border:1.5px solid rgba(45,106,79,.15);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:.88rem;color:var(--forest);transition:all .25s;text-align:left;}
+.submissions-toggle-btn:hover{background:rgba(45,106,79,.1);border-color:var(--forest);}
+.submissions-badge{display:inline-block;padding:2px 10px;border-radius:50px;font-size:.73rem;font-weight:800;}
+.badge-has{background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7;}
+.badge-empty{background:#F5F5F5;color:#9E9E9E;border:1px solid #E0E0E0;}
+
+/* ── Scale buttons in modal ── */
+.scale-btn{width:100%;padding:12px 16px;border-radius:14px;border:2px solid var(--sbd,#DDD);background:var(--sb,#F5F5F5);cursor:pointer;font-family:'Nunito',sans-serif;text-align:left;transition:all .2s;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:2px 10px;}
+.scale-btn:hover{transform:translateX(4px);box-shadow:0 3px 12px rgba(0,0,0,.1);}
+.scale-btn-active{border-width:2.5px;box-shadow:0 4px 16px rgba(0,0,0,.12);transform:translateX(4px);}
+.scale-code{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--sc,#333);grid-row:1/3;display:flex;align-items:center;}
+.scale-label{font-size:.9rem;font-weight:800;color:var(--sc,#333);}
+.scale-desc{font-size:.76rem;color:#666;line-height:1.4;}
+.donut-aulas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;margin-top:6px;}
+.donut-aula-card{display:flex;flex-direction:column;align-items:center;background:var(--warm-white);border-radius:16px;padding:12px 8px 10px;border:1.5px solid rgba(60,30,10,.08);box-shadow:0 2px 8px var(--shadow);transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+.donut-aula-card:hover{transform:translateY(-5px) scale(1.07);box-shadow:0 10px 24px var(--shadow-deep);}
+.donut-aula-label{font-size:.88rem;font-weight:700;color:var(--text-med);margin-top:5px;}
+.donut-aula-label strong{color:var(--forest);}
+.donut-aula-teacher{font-size:.65rem;color:var(--text-light);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:94px;text-align:center;}
+.donut-aula-sub{font-size:.7rem;font-weight:700;margin-top:3px;}
+
+/* ── Donut grid: participación por grado ── */
+.grade-donut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;margin-top:8px;}
+.grade-donut-card{display:flex;flex-direction:column;align-items:center;background:var(--warm-white);border-radius:18px;padding:16px 12px 12px;border:1.5px solid rgba(60,30,10,.08);box-shadow:0 2px 10px var(--shadow);transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+.grade-donut-card:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 14px 30px var(--shadow-deep);}
+.grade-donut-lbl{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--text-dark);margin-top:8px;margin-bottom:6px;}
+.grade-donut-stats{font-size:.71rem;color:var(--text-med);line-height:1.75;text-align:left;width:100%;padding:0 4px;}
+.dot-green{color:#52B788;}
+.dot-yellow{color:#C8A000;}
+.dot-red{color:#EF5350;}
+
+/* Response group accordion */
+.resp-group-btn{width:100%;display:flex;align-items:center;gap:12px;background:var(--warm-white);border:2px solid rgba(107,58,111,.18);border-radius:16px;padding:14px 20px;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .25s cubic-bezier(.34,1.56,.64,1);text-align:left;}
+.resp-group-btn:hover{border-color:var(--plum);box-shadow:0 4px 16px var(--shadow);transform:translateY(-2px);}
+.resp-group-btn.active{background:linear-gradient(135deg,rgba(107,58,111,.06),rgba(150,100,155,.04));border-color:var(--plum);}
+.resp-group-label{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--plum);flex:1;}
+.resp-group-count{font-size:.78rem;font-weight:700;background:rgba(107,58,111,.1);color:var(--plum);padding:3px 12px;border-radius:50px;}
+.resp-chevron{font-size:.75rem;color:var(--plum);transition:transform .3s ease;margin-left:4px;}
+
+/* ── AI Generate button ── */
+.btn-ai-gen{background:linear-gradient(135deg,var(--sky),var(--sky-light));color:white;border:none;border-radius:50px;padding:9px 22px;font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;}
+.btn-ai-gen:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 8px 20px rgba(33,150,168,.35);}
+.btn-ai-gen:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.ai-loading{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--sky);font-weight:700;padding:10px 14px;background:rgba(33,150,168,.07);border-radius:10px;}
+.ai-spinner{width:18px;height:18px;border:2.5px solid rgba(33,150,168,.25);border-top-color:var(--sky);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── Question level badges ── */
+.q-level-badge{display:inline-block;padding:2px 10px;border-radius:50px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+.level-literal{background:#E3F2FD;color:#1565C0;border:1px solid #90CAF9;}
+.level-inferencial{background:#F3E5F5;color:#6A1B9A;border:1px solid #CE93D8;}
+.level-critico{background:#FFF3E0;color:#E65100;border:1px solid #FFCC80;}
+
+/* ── Audio recorder ── */
+.audio-recorder{margin-top:10px;}
+.btn-rec{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1565C0,#1976D2);color:white;border:none;border-radius:50px;padding:9px 20px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);}
+.btn-rec:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 6px 16px rgba(21,101,192,.35);}
+.btn-rec.recording{background:linear-gradient(135deg,#C62828,#EF5350);animation:recPulse 1.2s ease-in-out infinite;}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(198,40,40,.4);}50%{box-shadow:0 0 0 10px rgba(198,40,40,0);}}
+.rec-status{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 14px;background:#FFEBEE;border-radius:10px;font-size:.82rem;font-weight:700;color:#C62828;}
+.rec-dot{width:10px;height:10px;background:#C62828;border-radius:50%;animation:recPulse 1s infinite;}
+.btn-rec-stop{background:#C62828;color:white;border:none;border-radius:50px;padding:5px 14px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;transition:all .2s;}
+.btn-rec-stop:hover{background:#8B0000;}
+.audio-preview{margin-top:10px;}
+.audio-preview audio{width:100%;border-radius:10px;}
+.audio-preview .audio-ok{display:flex;align-items:center;gap:8px;font-size:.8rem;color:#2E7D32;font-weight:700;margin-bottom:6px;}
+
+/* ── AI Auto-review box in submission card ── */
+.ai-review-box{background:linear-gradient(135deg,rgba(33,150,168,.06),rgba(72,202,228,.03));border:1.5px solid rgba(33,150,168,.2);border-radius:12px;padding:12px 16px;margin-top:10px;}
+.ai-review-title{font-size:.78rem;font-weight:800;color:var(--sky);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.ai-review-item{margin-bottom:6px;font-size:.8rem;line-height:1.5;}
+.ai-review-label{font-weight:700;color:var(--text-med);}
+
+/* ── Progress Report modal ── */
+.progress-report-box{background:var(--warm-white);border-radius:20px;padding:24px;box-shadow:0 4px 20px var(--shadow);margin-top:16px;}
+.progress-section{margin-bottom:18px;}
+.progress-section-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text-dark);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid rgba(60,30,10,.08);}
+.progress-level-bar{height:20px;border-radius:50px;margin-bottom:4px;position:relative;overflow:hidden;}
+.progress-level-fill{height:100%;border-radius:50px;transition:width 1s ease;}
+.recommendation-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--cream);border-radius:10px;margin-bottom:8px;font-size:.84rem;line-height:1.55;}
+
+/* ── Celebration overlay ── */
+.celebration-overlay{position:fixed;inset:0;z-index:9000;pointer-events:none;display:flex;align-items:center;justify-content:center;}
+.celebration-box{background:white;border-radius:30px;padding:40px 48px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.25);animation:celebIn .5s cubic-bezier(.34,1.56,.64,1) both;pointer-events:all;}
+@keyframes celebIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+.celebration-star{font-size:64px;animation:starSpin 1s ease both;}
+@keyframes starSpin{0%{transform:rotate(-20deg) scale(.5);opacity:0;}60%{transform:rotate(10deg) scale(1.2);}100%{transform:rotate(0deg) scale(1);opacity:1;}}
+.confetti-piece{position:fixed;width:10px;height:10px;border-radius:2px;animation:confettiFall linear forwards;pointer-events:none;z-index:9001;}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+
+/* ── Racha semanal ── */
+.streak-banner{background:linear-gradient(135deg,#FF6F00,#FFA000);border-radius:18px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;color:white;box-shadow:0 6px 20px rgba(255,111,0,.3);animation:fadeUp .5s ease both;}
+.streak-fire{font-size:2.2rem;animation:fireWiggle 1.5s ease-in-out infinite;}
+@keyframes fireWiggle{0%,100%{transform:rotate(-8deg) scale(1);}50%{transform:rotate(8deg) scale(1.1);}}
+.streak-num{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;line-height:1;}
+.streak-label{font-size:.82rem;font-weight:700;opacity:.9;}
+
+/* ── Botón audio instrucciones ── */
+.btn-audio-help{position:fixed;bottom:90px;right:24px;z-index:400;background:linear-gradient(135deg,var(--amber-dark),var(--amber-light));color:white;border:none;border-radius:50px;padding:12px 20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;box-shadow:0 6px 20px rgba(196,130,26,.45);transition:all .3s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:8px;}
+.btn-audio-help:hover{transform:translateY(-4px) scale(1.06);box-shadow:0 12px 28px rgba(196,130,26,.5);}
+.btn-audio-help.speaking{animation:recPulse 1.2s ease-in-out infinite;background:linear-gradient(135deg,#C62828,#EF5350);}
+
+@media(max-width:600px){.dash-content{padding:18px 14px;}.reading-card{flex-direction:column;}.reading-actions{justify-content:flex-start;}.admin-table{font-size:.76rem;}.admin-table th,.admin-table td{padding:9px 8px;}.login-box{padding:36px 24px;}}
+
+@media print{
+  body{background:white;font-family:'Nunito',sans-serif;}
+  .no-print{display:none!important;}
+  .pdf-report{display:block!important;}
+  @page{margin:18mm 15mm;size:A4;}
+}
+.pdf-report{display:none;}
+</style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="particles" id="particles"></div>
+
+<!-- ═══ LANDING ═══ -->
+<div id="screen-landing" class="screen active">
+  <div class="hero-ornament">📖</div>
+  <h1 class="hero-title">Lectura<br><span>en Familia</span></h1>
+  <p class="hero-sub">Un puente entre el hogar y la escuela,<br>construido con palabras y amor.</p>
+  <div class="role-grid">
+    <div class="role-card teacher" onclick="goLogin('teacher')">
+      <div class="role-icon">🧑‍🏫</div>
+      <div class="role-name">Maestra / Maestro</div>
+      <div class="role-desc">Sube textos, cuentos y leyendas. Crea preguntas de comprensión.</div>
+    </div>
+    <div class="role-card parent" onclick="goLogin('parent')">
+      <div class="role-icon">👨‍👩‍👦</div>
+      <div class="role-name">Familia</div>
+      <div class="role-desc">Papá, mamá e hijo/a leen juntos el texto de esta semana.</div>
+    </div>
+    <div class="role-card admin" onclick="goLogin('admin')">
+      <div class="role-icon">🏫</div>
+      <div class="role-name">Director / Admin</div>
+      <div class="role-desc">Monitorea el avance semanal de todas las aulas del plantel.</div>
+    </div>
+  </div>
+  <p class="footer-note">Nivel Primaria · de 1° a 6° grado</p>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="screen-login" class="screen">
+  <div class="login-box">
+    <span id="login-icon" class="login-icon">🧑‍🏫</span>
+    <h2 id="login-title" class="login-title">Acceso Docente</h2>
+    <p id="login-subtitle" class="login-subtitle">Selecciona tu grado y sección</p>
+    <div id="login-fields">
+      <div class="form-group" id="fg-grade">
+        <label>Grado</label>
+        <select id="sel-grade" onchange="updateSections()">
+          <option value="">— Selecciona —</option>
+          <option value="1">1°</option>
+          <option value="2">2°</option>
+          <option value="3">3°</option>
+          <option value="4">4°</option>
+          <option value="5">5°</option>
+          <option value="6">6°</option>
+        </select>
+      </div>
+      <div class="form-group" id="fg-section">
+        <label>Sección</label>
+        <select id="sel-section">
+          <option value="">— Primero selecciona grado —</option>
+        </select>
+      </div>
+      <div class="form-group" id="fg-student" style="display:none">
+        <label>Nombre del estudiante</label>
+        <input type="text" id="inp-student" placeholder="Ej: María García">
+      </div>
+      <div class="form-group" id="fg-password">
+        <label>Contraseña</label>
+        <input type="password" id="inp-pass" placeholder="••••••••">
+      </div>
+    </div>
+    <button id="btn-login" class="btn-primary btn-green" onclick="doLogin()">Ingresar →</button>
+    <br><br>
+    <button class="back-btn" onclick="showScreen('landing')" style="width:100%">← Regresar</button>
+  </div>
+</div>
+
+<!-- ═══ TEACHER ═══ -->
+<div id="screen-teacher" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand" onclick="showScreen('landing')">📖 <span>Lectura</span>&nbsp;en Familia</div>
+    <div id="teacher-topbar-info" class="topbar-info"></div>
+    <button class="back-btn" onclick="showScreen('landing')">Salir</button>
+  </div>
+  <div class="dash-hero teacher-hero">
+    <span class="hero-emoji-bg">📚</span>
+    <div class="dash-welcome">Bienvenido/a,</div>
+    <div class="dash-name">Maestra / Maestro</div>
+    <div id="teacher-dash-badge" class="dash-badge">📚 Grado — · Sección —</div>
+  </div>
+  <div class="dash-content">
+    <div class="info-banner"><span>💡</span><span>Solo puedes subir y ver textos de <strong>tu</strong> grado y sección. Meta: <strong>4 textos por mes</strong> (uno cada semana).</span></div>
+    <div class="section-title">✍️ Subir nuevo texto</div>
+    <div class="upload-box">
+      <div class="upload-row">
+        <div class="form-group" style="margin:0">
+          <label>Tipo de texto</label>
+          <select id="up-type"><option value="cuento">📖 Cuento</option><option value="leyenda">🌿 Leyenda</option><option value="texto">📄 Texto informativo</option><option value="fabula">🦊 Fábula</option><option value="poema">🌸 Poema</option></select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Semana</label>
+          <input type="week" id="up-week" style="width:100%;padding:13px 16px;border:2px solid rgba(60,30,10,.1);border-radius:14px;font-family:'Nunito',sans-serif;font-size:.93rem;background:var(--cream);outline:none;">
+        </div>
+      </div>
+      <div class="form-group"><label>Título del texto</label><input type="text" id="up-title" placeholder="Ej: El Gigante Egoísta"></div>
+      <div class="text-area-group">
+        <label style="display:block;font-weight:700;font-size:.82rem;color:var(--text-med);margin-bottom:7px;letter-spacing:.04em;text-transform:uppercase">Contenido del texto</label>
+        <textarea id="up-content" placeholder="Pega o escribe aquí el cuento, leyenda o texto..."></textarea>
+      </div>
+      <div class="questions-section">
+        <label style="display:block;font-weight:700;font-size:.82rem;color:var(--text-med);margin-bottom:12px;letter-spacing:.04em;text-transform:uppercase">❓ Preguntas de comprensión</label>
+        <!-- IA GENERA PREGUNTAS -->
+        <div id="ai-gen-box" style="background:linear-gradient(135deg,rgba(33,150,168,.08),rgba(72,202,228,.05));border:1.5px solid rgba(33,150,168,.25);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span style="font-size:1.3rem">✨</span>
+          <span style="font-size:.85rem;color:var(--sky);font-weight:700;flex:1">Generar preguntas automáticamente con IA</span>
+          <button class="btn-ai-gen" id="btn-gen-questions" onclick="generateQuestionsAI()">✨ Generar con IA</button>
+        </div>
+        <div id="ai-gen-status" style="display:none;margin-bottom:12px"></div>
+        <div id="questions-list">
+          <div class="question-row"><input type="text" placeholder="Pregunta 1..." class="q-input"><button class="btn-icon btn-del" onclick="removeQuestion(this)">🗑</button></div>
+          <div class="question-row"><input type="text" placeholder="Pregunta 2..." class="q-input"><button class="btn-icon btn-del" onclick="removeQuestion(this)">🗑</button></div>
+          <div class="question-row"><input type="text" placeholder="Pregunta 3..." class="q-input"><button class="btn-icon btn-del" onclick="removeQuestion(this)">🗑</button></div>
+        </div>
+        <button class="btn-icon btn-add" onclick="addQuestion()">+ Agregar pregunta</button>
+      </div>
+      <div style="margin-top:22px"><button class="btn-primary btn-green" onclick="uploadText()" style="width:auto;padding:14px 38px;">📤 Publicar texto</button></div>
+    </div>
+    <div class="section-title">📚 Textos publicados</div>
+    <div id="texts-list"></div>
+    <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="verCalificaciones()" style="background:var(--forest);width:auto;padding:12px 28px;">📊 Ver calificaciones por semana</button>
+      <button class="btn-primary" onclick="verGrafico()" style="background:#1565C0;width:auto;padding:12px 28px;">📈 Ver gráfico de niveles</button>
+    </div>
+    <div id="grafico-panel" style="display:none;margin-top:20px">
+      <div class="section-title">📈 Distribución de niveles de logro</div>
+      <div id="grafico-contenido" style="margin-top:12px"></div>
+    </div>
+    <div id="calificaciones-panel" style="display:none;margin-top:20px">
+      <div class="section-title">📊 Calificaciones guardadas</div>
+      <div id="calificaciones-lista" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PARENT ═══ -->
+<div id="screen-parent" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand" onclick="showScreen('landing')">📖 <span>Lectura</span>&nbsp;en Familia</div>
+    <div id="parent-topbar-info" class="topbar-info"></div>
+    <button class="back-btn" onclick="showScreen('landing')">Salir</button>
+  </div>
+  <!-- Botón flotante de instrucciones en audio -->
+  <button class="btn-audio-help" id="btn-audio-help" onclick="toggleAudioHelp()">
+    🔊 ¿Cómo usar?
+  </button>
+  <div class="dash-hero parent-hero">
+    <span class="hero-emoji-bg">👨‍👩‍👦</span>
+    <div class="dash-welcome">Bienvenida, familia</div>
+    <div id="parent-dash-name" class="dash-name">Lectura Semanal</div>
+    <div id="parent-dash-badge" class="dash-badge">🎒 Grado — · Sección —</div>
+  </div>
+  <div class="dash-content" id="parent-content"></div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div id="screen-admin" class="screen">
+  <div class="topbar no-print">
+    <div class="topbar-brand" onclick="showScreen('landing')">📖 <span>Lectura</span>&nbsp;en Familia</div>
+    <div class="topbar-info"><strong>Panel Administrativo</strong></div>
+    <button class="back-btn" onclick="showScreen('landing')">Salir</button>
+  </div>
+  <div class="dash-hero admin-hero no-print">
+    <span class="hero-emoji-bg">🏫</span>
+    <div class="dash-welcome">Bienvenido/a,</div>
+    <div class="dash-name">Director/a</div>
+    <div class="dash-badge">🏫 Nivel Primaria · de 1° a 6° grado</div>
+  </div>
+  <div class="dash-content">
+    <div id="admin-stats" class="stats-grid no-print"></div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:20px;" class="no-print">
+      <button class="btn-pdf" onclick="generatePDF()">📄 Informe Mensual PDF</button>
+    </div>
+    <div class="section-title no-print">📊 Avance por Grado y Sección — textos subidos este mes (meta: 4 · 1 por semana)</div>
+    <div id="chart-by-classroom" class="no-print"></div>
+    <div class="section-title no-print" style="margin-top:8px">📈 Avance por Grado — promedio de todas sus secciones</div>
+    <div id="chart-by-grade" class="no-print"></div>
+    <div class="section-title no-print" style="margin-top:8px">📋 Reporte detallado</div>
+    <div class="tab-bar no-print" id="admin-tabs"></div>
+    <div class="admin-table-wrap no-print">
+      <table class="admin-table">
+        <thead><tr><th>Grado</th><th>Sección</th><th>Docente</th><th>Textos/mes</th><th>Sem. actual</th><th>Estado</th></tr></thead>
+        <tbody id="admin-table-body"></tbody>
+      </table>
+    </div>
+    <div class="section-title no-print">🔑 Contraseñas de acceso docente</div>
+    <div class="pass-table-wrap no-print">
+      <table class="pass-table">
+        <thead><tr><th>Grado</th><th>Sección</th><th>Contraseña</th><th>Docente asignado/a</th></tr></thead>
+        <tbody id="pass-table-body"></tbody>
+      </table>
+    </div>
+    <div class="section-title no-print">👨‍🎓 Gestión de Estudiantes</div>
+    <div class="no-print" style="background:var(--warm-white);border-radius:22px;padding:24px;box-shadow:0 4px 20px var(--shadow);margin-bottom:28px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-bottom:18px;">
+        <div class="form-group" style="margin:0">
+          <label>Nombre del estudiante</label>
+          <input type="text" id="st-name" placeholder="Ej: María García">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-group" style="margin:0">
+            <label>Grado</label>
+            <select id="st-grade" onchange="updateStSection()">
+              <option value="">— Grado —</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Sección</label>
+            <select id="st-section"><option value="">— Sección —</option></select>
+          </div>
+        </div>
+        <button class="btn-primary btn-plum" onclick="addStudent()" style="width:auto;padding:13px 24px;white-space:nowrap">+ Agregar</button>
+      </div>
+      <div id="students-list"></div>
+    </div>
+
+
+  </div>
+</div>
+
+<div id="pdf-report" class="pdf-report"></div>
+
+<!-- EDIT STUDENT MODAL -->
+<div class="modal-overlay" id="edit-student-modal">
+  <div class="modal-box">
+    <div class="modal-title">✏️ Editar estudiante</div>
+    <div class="form-group"><label>Nombre</label><input type="text" id="edit-st-name"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group" style="margin:0">
+        <label>Grado</label>
+        <select id="edit-st-grade" onchange="updateEditStSection()">
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Sección</label>
+        <select id="edit-st-section"></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEditStudentModal()">Cancelar</button>
+      <button class="btn-confirm" style="background:var(--plum)" onclick="confirmEditStudent()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal-box">
+    <div class="modal-title">🗑️ Eliminar texto</div>
+    <p style="color:var(--text-med);font-size:.95rem;line-height:1.65">¿Estás seguro/a de eliminar <strong id="del-text-name"></strong>?<br>Esta acción no se puede deshacer.</p>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-confirm" onclick="confirmDelete()">Sí, eliminar</button></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-box">
+    <div class="modal-title">✏️ Editar texto</div>
+    <div class="form-group"><label>Título</label><input type="text" id="edit-title"></div>
+    <div class="text-area-group">
+      <label style="display:block;font-weight:700;font-size:.82rem;color:var(--text-med);margin-bottom:7px;letter-spacing:.04em;text-transform:uppercase">Contenido</label>
+      <textarea id="edit-content" style="min-height:150px;width:100%;padding:14px;border:2px solid rgba(60,30,10,.1);border-radius:14px;font-family:'Nunito',sans-serif;font-size:.93rem;background:var(--cream);outline:none;resize:vertical;"></textarea>
+    </div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeEditModal()">Cancelar</button><button class="btn-confirm" style="background:var(--forest)" onclick="confirmEdit()">Guardar cambios</button></div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL — Calificación MINEDU -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal-box" style="max-width:600px">
+    <div class="modal-title">📝 Calificar tarea — Escala MINEDU Perú</div>
+    <div style="background:var(--cream);border-radius:12px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px">
+      <div style="width:42px;height:42px;background:linear-gradient(135deg,var(--forest),var(--forest-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">🎒</div>
+      <div>
+        <div style="font-weight:800;font-size:.95rem;color:var(--text-dark)" id="review-student-name">—</div>
+        <div style="font-size:.76rem;color:var(--text-light)">Lectura en Familia · Comprensión lectora</div>
+      </div>
+    </div>
+
+    <div style="font-weight:700;font-size:.82rem;color:var(--text-med);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Selecciona la calificación</div>
+    <div id="review-scale-btns" style="display:flex;flex-direction:column;gap:8px"></div>
+
+    <div style="margin-top:18px">
+      <label style="display:block;font-weight:700;font-size:.82rem;color:var(--text-med);margin-bottom:7px;text-transform:uppercase;letter-spacing:.04em">💬 Comentario para la familia <span style="font-weight:400;text-transform:none;font-size:.78rem">(opcional)</span></label>
+      <textarea id="review-comment" placeholder="Ej: Muy buen trabajo al identificar las ideas principales. Se recomienda mejorar la ortografía..." style="width:100%;padding:12px 14px;border:2px solid rgba(60,30,10,.1);border-radius:12px;font-family:'Nunito',sans-serif;font-size:.9rem;min-height:80px;resize:vertical;outline:none;background:var(--cream);transition:border-color .2s" onfocus="this.style.borderColor='var(--forest)'" onblur="this.style.borderColor='rgba(60,30,10,.1)'"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeReviewModal()">Cancelar</button>
+      <button class="btn-confirm" id="review-save-btn" data-selected="" onclick="saveReview()" style="background:linear-gradient(135deg,var(--forest),var(--forest-light))">Guardar calificación</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS REPORT MODAL -->
+<div class="modal-overlay" id="progress-modal">
+  <div class="modal-box" style="max-width:660px">
+    <div class="modal-title">📊 Reporte de Progreso Lector — MINEDU Perú</div>
+    <div id="progress-report-content"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('progress-modal').classList.remove('open')">Cerrar</button>
+      <button class="btn-confirm" style="background:linear-gradient(135deg,#1565C0,#1976D2)" onclick="printProgressReport()">🖨️ Imprimir reporte</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ══════════════════ CURSOR ══════════════════
+const dot=document.getElementById('cursorDot'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+(function loop(){rx+=(mx-rx)*.14;ry+=(my-ry)*.14;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+function bindCursor(){document.querySelectorAll('button,.role-card,select,input').forEach(el=>{el.addEventListener('mouseenter',()=>ring.classList.add('big'));el.addEventListener('mouseleave',()=>ring.classList.remove('big'));});}
+bindCursor();
+
+// ══════════════════ PARTICLES ══════════════════
+(function(){
+  const c=document.getElementById('particles');
+  const em=['📖','✨','🌟','📝','🍂','🌿','⭐','🎒'];
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');p.className='particle';
+    const sz=Math.random()*14+7,left=Math.random()*100,dur=Math.random()*14+10,delay=Math.random()*20;
+    p.style.cssText=`left:${left}%;bottom:-60px;animation-duration:${dur}s;animation-delay:${delay}s;`;
+    if(Math.random()>.45){p.textContent=em[Math.floor(Math.random()*em.length)];p.style.fontSize=sz+'px';}
+    else{p.style.width=sz+'px';p.style.height=sz+'px';p.style.borderRadius='50%';const cols=['rgba(232,160,32,.28)','rgba(45,106,79,.2)','rgba(192,82,42,.18)'];p.style.background=cols[Math.floor(Math.random()*cols.length)];}
+    c.appendChild(p);
+  }
+})();
+
+// ══════════════════ GRADO → SECCIONES ══════════════════
+// 1°: A,B,C,D  |  2°: A,B,C,D,E  |  3°: A,B,C,D,E
+// 4°: A,B,C,D  |  5°: A,B,C,D,E  |  6°: A,B,C,D,E
+const GRADE_SECTIONS = {
+  '1':['A','B','C','D'],
+  '2':['A','B','C','D','E'],
+  '3':['A','B','C','D','E'],
+  '4':['A','B','C','D'],
+  '5':['A','B','C','D','E'],
+  '6':['A','B','C','D','E']
+};
+
+function updateSections(){
+  const grade=document.getElementById('sel-grade').value;
+  const sel=document.getElementById('sel-section');
+  if(!grade){sel.innerHTML='<option value="">— Primero selecciona grado —</option>';return;}
+  const secs=GRADE_SECTIONS[grade]||[];
+  sel.innerHTML='<option value="">— Selecciona —</option>'+secs.map(s=>`<option value="${s}">${s}</option>`).join('');
+}
+
+// ══════════════════ DATA ══════════════════
+const MONTHLY_GOAL = 4;
+
+const TEACHER_PASSWORDS = {
+  "1-A":"read1a","1-B":"read1b","1-C":"read1c","1-D":"read1d",
+  "2-A":"read2a","2-B":"read2b","2-C":"read2c","2-D":"read2d","2-E":"read2e",
+  "3-A":"read3a","3-B":"read3b","3-C":"read3c","3-D":"read3d","3-E":"read3e",
+  "4-A":"read4a","4-B":"read4b","4-C":"read4c","4-D":"read4d",
+  "5-A":"read5a","5-B":"read5b","5-C":"read5c","5-D":"read5d","5-E":"read5e",
+  "6-A":"read6a","6-B":"read6b","6-C":"read6c","6-D":"read6d","6-E":"read6e"
+};
+const ADMIN_PASSWORD = "director2024";
+
+let currentRole=null,currentGrade=null,currentSection=null,deleteIndex=null,editIndex=null;
+
+// ── Textos reales subidos por docentes — persiste en localStorage ──
+const texts=(()=>{try{return JSON.parse(localStorage.getItem('lef_texts')||'{}');}catch(e){return{};}})();
+function saveTexts(){try{localStorage.setItem('lef_texts',JSON.stringify(texts));}catch(e){}}
+
+// ── Registro de aulas con nombres reales de docentes ──
+const adminOverview=[
+  {grade:'1',section:'A',teacher:'Pilar'},
+  {grade:'1',section:'B',teacher:'Magaly'},
+  {grade:'1',section:'C',teacher:'Milagros Dioses'},
+  {grade:'1',section:'D',teacher:'Flor de María'},
+  {grade:'2',section:'A',teacher:'Patricia'},
+  {grade:'2',section:'B',teacher:'Sandra B'},
+  {grade:'2',section:'C',teacher:'Beatriz'},
+  {grade:'2',section:'D',teacher:'Ana Lazares'},
+  {grade:'2',section:'E',teacher:'Ana Carrasco'},
+  {grade:'3',section:'A',teacher:'Lisset'},
+  {grade:'3',section:'B',teacher:'Mary Luz'},
+  {grade:'3',section:'C',teacher:'Paola'},
+  {grade:'3',section:'D',teacher:'Juana'},
+  {grade:'3',section:'E',teacher:'Katherine'},
+  {grade:'4',section:'A',teacher:'Javier'},
+  {grade:'4',section:'B',teacher:'Martha'},
+  {grade:'4',section:'C',teacher:'Felix'},
+  {grade:'4',section:'D',teacher:'Ofelia'},
+  {grade:'5',section:'A',teacher:'Milagros Campos'},
+  {grade:'5',section:'B',teacher:'Bethy'},
+  {grade:'5',section:'C',teacher:'Margot'},
+  {grade:'5',section:'D',teacher:'Nicolás'},
+  {grade:'5',section:'E',teacher:'José'},
+  {grade:'6',section:'A',teacher:'Roger'},
+  {grade:'6',section:'B',teacher:'Marisol'},
+  {grade:'6',section:'C',teacher:'Rosamel'},
+  {grade:'6',section:'D',teacher:'María'},
+  {grade:'6',section:'E',teacher:'Elizabeth'},
+];
+
+// ── Respuestas de familias — persiste en localStorage + Firebase ──
+let familyResponses=[];
+function saveResponses(){} // datos en Firebase, no localStorage
+
+async function cargarRespuestasFirebase(){
+  try{
+    const res=await fetch(FB_URL+'/respuestas.json');
+    const data=await res.json();
+    if(!data){familyResponses=[];return;}
+    familyResponses=Object.values(data).map(r=>({
+      student:r.nombre||'',family:r.nombre||'',
+      grade:String(r.grado||''),section:r.seccion||'',
+      text:r.texto||'',week:r.semana||'',
+      submittedAt:r.fecha||'',
+      textId:r.textId||'',
+      answers:[r.respuesta1||'',r.respuesta2||'',r.respuesta3||'',r.respuesta4||'',r.respuesta5||''],
+      // Cargar audios guardados en Firebase (base64)
+      tiene_audios: r.tiene_audios||false,
+      audio_lectura: r.audio_lectura||null,
+      audio_resp_1: r.audio_resp_1||null,
+      audio_resp_2: r.audio_resp_2||null,
+      audio_resp_3: r.audio_resp_3||null,
+      audio_resp_4: r.audio_resp_4||null,
+      audio_resp_5: r.audio_resp_5||null,
+      questions:[],audioUrls:[],readingAudioUrl:null
+    }));
+  }catch(e){
+    console.warn('Error cargando Firebase:',e);
+    familyResponses=[];
+    toast('⚠️ No se pudo conectar con Firebase. Verifica tu conexión.','#C62828');
+  }
+}
+
+// ══════════════════ NAVIGATION ══════════════════
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(bindCursor,100);
+}
+
+function goLogin(role){
+  currentRole=role;
+  const cfg={
+    teacher:{icon:'🧑‍🏫',title:'Acceso Docente',       sub:'Selecciona tu grado, sección e ingresa tu contraseña',btn:'btn-green'},
+    parent: {icon:'👨‍👩‍👦',title:'Acceso Familia',      sub:'Selecciona el grado y sección de tu hijo/a',btn:'btn-amber'},
+    admin:  {icon:'🏫',   title:'Acceso Administrativo',sub:'Ingresa la contraseña de director/a',btn:'btn-plum'},
+  }[role];
+  document.getElementById('login-icon').textContent=cfg.icon;
+  document.getElementById('login-title').textContent=cfg.title;
+  document.getElementById('login-subtitle').textContent=cfg.sub;
+  document.getElementById('btn-login').className='btn-primary '+cfg.btn;
+  document.getElementById('fg-grade').style.display  =role!=='admin'?'':'none';
+  document.getElementById('fg-section').style.display=role!=='admin'?'':'none';
+  document.getElementById('fg-student').style.display=role==='parent'?'':'none';
+  document.getElementById('fg-password').style.display=(role==='teacher'||role==='admin')?'':'none';
+  document.getElementById('inp-pass').value='';
+  // Reset section dropdown
+  document.getElementById('sel-grade').value='';
+  document.getElementById('sel-section').innerHTML='<option value="">— Primero selecciona grado —</option>';
+  showScreen('login');
+}
+
+function doLogin(){
+  const pass=document.getElementById('inp-pass').value.trim();
+  if(currentRole==='admin'){
+    if(pass!==ADMIN_PASSWORD){toast('🔒 Contraseña incorrecta','#C62828');return;}
+    showAdminScreen();showScreen('admin');toast('✅ Bienvenido/a, Director/a');return;
+  }
+  const grade=document.getElementById('sel-grade').value,section=document.getElementById('sel-section').value;
+  if(!grade||!section){toast('⚠️ Selecciona grado y sección','#E65100');return;}
+  if(currentRole==='teacher'){
+    const correct=TEACHER_PASSWORDS[`${grade}-${section}`]||'';
+    if(!pass){toast('⚠️ Ingresa tu contraseña','#E65100');return;}
+    if(pass!==correct){toast('🔒 Contraseña incorrecta para este grado/sección','#C62828');return;}
+  }
+  currentGrade=grade;currentSection=section;
+  if(currentRole==='teacher'){
+    const teacherInfo=adminOverview.find(t=>String(t.grade)===String(grade)&&t.section===section);
+    const teacherName=teacherInfo?teacherInfo.teacher:'Docente';
+    showTeacherDash();showScreen('teacher');toast('✅ Bienvenido/a, '+teacherName+' 👋');
+  }
+  else{
+    const s=document.getElementById('inp-student').value.trim();
+    if(!s){toast('⚠️ Ingresa el nombre del estudiante','#E65100');return;}
+    if(!isStudentRegistered(s,grade,section)){
+      toast('🚫 Este estudiante no está registrado en '+grade+'°'+section+'. Consulta a la docente.','#C62828');
+      return;
+    }
+    showParentScreen(s);showScreen('parent');toast('📖 ¡A leer en familia!');
+  }
+}
+
+// ══════════════════ TEACHER ══════════════════
+function showTeacherDash(){
+  const tInfo=adminOverview.find(t=>String(t.grade)===String(currentGrade)&&t.section===currentSection);
+  const tName=tInfo?tInfo.teacher:'Docente';
+  document.getElementById('teacher-dash-badge').textContent=`📚 Bienvenida/o, ${tName} — ${currentGrade}° · ${currentSection}`;
+  document.getElementById('teacher-topbar-info').innerHTML=`<strong>${tName} | ${currentGrade}° · ${currentSection}</strong>`;
+  const now=new Date(),y=now.getFullYear(),w=getWeek(now);
+  document.getElementById('up-week').value=`${y}-W${String(w).padStart(2,'0')}`;
+  renderTextList();
+}
+function getWeek(d){d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil((((d-y)/86400000)+1)/7);}
+function getKey(){return`${currentGrade}-${currentSection}`;}
+function getTexts(){return texts[getKey()]||[];}
+
+// ══ MINEDU PERÚ — Escala de calificación literal ══
+// AD = Logro destacado (18-20)  A = Logro esperado (14-17)
+// B  = En proceso (11-13)       C = En inicio (0-10)
+const MINEDU_SCALE=[
+  {code:'AD',label:'Logro Destacado',color:'#1565C0',bg:'#E3F2FD',border:'#90CAF9',
+   desc:'El estudiante evidencia el logro de los aprendizajes previstos, demostrando incluso un manejo solvente y muy satisfactorio en todas las tareas propuestas.'},
+  {code:'A', label:'Logro Esperado',  color:'#2E7D32',bg:'#E8F5E9',border:'#A5D6A7',
+   desc:'El estudiante evidencia el logro de los aprendizajes previstos en el tiempo programado.'},
+  {code:'B', label:'En Proceso',      color:'#E65100',bg:'#FFF3E0',border:'#FFCC80',
+   desc:'El estudiante está próximo o cerca al nivel esperado respecto a la competencia, para lo cual requiere acompañamiento durante un tiempo razonable.'},
+  {code:'C', label:'En Inicio',       color:'#C62828',bg:'#FFEBEE',border:'#EF9A9A',
+   desc:'El estudiante muestra un progreso mínimo en una competencia según el nivel esperado. Evidencia con frecuencia dificultades en el desarrollo de las tareas.'},
+];
+
+function getScaleInfo(code){return MINEDU_SCALE.find(s=>s.code===code)||MINEDU_SCALE[1];}
+
+function renderTextList(){
+  const list=document.getElementById('texts-list'),arr=getTexts();
+  if(!arr.length){list.innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><p>Aún no has publicado textos para este grupo.<br>¡Sube el primero!</p></div>`;return;}
+  const te={cuento:'📖',leyenda:'🌿',texto:'📄',fabula:'🦊',poema:'🌸'};
+  const tb={cuento:'badge-cuento',leyenda:'badge-leyenda',texto:'badge-texto',fabula:'badge-cuento',poema:'badge-leyenda'};
+
+  list.innerHTML=arr.map((t,i)=>{
+    const resps=familyResponses.filter(r=>String(r.grade)===String(currentGrade)&&String(r.section)===String(currentSection)&&r.text===t.title);
+    const reviewed=resps.filter(r=>r.grade_minedu).length;
+    const pending=resps.length-reviewed;
+
+    const submissionsHTML=resps.length?resps.map((r,ri)=>{
+      const sc=r.grade_minedu?getScaleInfo(r.grade_minedu):null;
+      // Construir reproductores de audio si hay audios guardados
+      const audioLecturaHTML=r.audio_lectura?`
+        <div style="margin:10px 0;background:linear-gradient(135deg,rgba(33,150,168,.07),rgba(72,202,228,.04));border:1.5px solid rgba(33,150,168,.2);border-radius:12px;padding:12px 14px">
+          <div style="font-size:.78rem;font-weight:800;color:#1565C0;margin-bottom:6px">🎙️ Lectura en voz alta — evaluación oral</div>
+          <audio controls src="${r.audio_lectura}" style="width:100%;border-radius:8px"></audio>
+        </div>`:'';
+      const audiosRespHTML=t.questions.map((_,qi)=>{
+        const audioKey=`audio_resp_${qi+1}`;
+        return r[audioKey]?`
+          <div style="margin-top:6px">
+            <div style="font-size:.74rem;font-weight:700;color:var(--forest);margin-bottom:3px">🎙️ Audio pregunta ${qi+1}</div>
+            <audio controls src="${r[audioKey]}" style="width:100%;border-radius:6px;height:32px"></audio>
+          </div>`:'';
+      }).join('');
+      const tieneAudios=r.tiene_audios||r.audio_lectura||t.questions.some((_,qi)=>r[`audio_resp_${qi+1}`]);
+      return`<div class="submission-card" id="sc-${t.id}-${ri}" style="animation:fadeUp .3s ${ri*.05}s ease both">
+        <div class="submission-avatar">${(r.student||'?')[0].toUpperCase()}</div>
+        <div class="submission-body">
+          <div class="submission-header">
+            <div class="submission-name">${r.student} ${tieneAudios?'<span style="font-size:.7rem;background:#E3F2FD;color:#1565C0;padding:2px 8px;border-radius:50px;font-weight:700">🎙️ Con audio</span>':''}</div>
+            <div class="submission-date">📅 ${r.submittedAt||'—'}</div>
+          </div>
+          ${audioLecturaHTML}
+          <div class="submission-answers">
+            ${(r.answers||[]).map((ans,qi)=>(ans||r[`audio_resp_${qi+1}`])?`
+              <div class="submission-qa">
+                <div class="submission-q">❓ ${t.questions[qi]?(t.questions[qi].text||t.questions[qi]):'Pregunta '+(qi+1)}</div>
+                ${ans?`<div class="submission-a">${ans}</div>`:''}
+                ${r[`audio_resp_${qi+1}`]?`<div style="margin-top:4px"><div style="font-size:.74rem;font-weight:700;color:var(--forest);margin-bottom:2px">🎙️ Respuesta en audio</div><audio controls src="${r[`audio_resp_${qi+1}`]}" style="width:100%;border-radius:6px;height:32px"></audio></div>`:''}
+              </div>`:'').join('')}
+            ${!(r.answers||[]).some(a=>a)&&!tieneAudios?'<em style="color:#bbb;font-size:.82rem">Las respuestas se enviaron (sin texto escrito)</em>':''}
+          </div>
+          <div class="submission-footer">
+            ${sc?`<div class="minedu-badge-given" style="background:${sc.bg};border-color:${sc.border};color:${sc.color}">
+              <span class="minedu-code">${sc.code}</span>
+              <span class="minedu-lbl">${sc.code==='AD'?'AD — Logro Destacado':sc.code==='A'?'A — Logro Esperado':sc.code==='B'?'B — En Proceso':'C — En Inicio'}</span>
+              ${r.teacher_comment?`<span class="minedu-comment">💬 ${r.teacher_comment}</span>`:''}
+            </div>
+            <button class="btn-sm btn-edit" style="font-size:.72rem;padding:5px 12px" onclick="openReviewModal(${ri},'${t.title}')">✏️ Editar nota</button>`
+            :`<button class="btn-review" onclick="openReviewModal(${ri},'${t.title}')">
+                📝 Calificar — Escala MINEDU
+              </button>`}
+          </div>
+        </div>
+      </div>`;}).join('')
+    :`<div style="padding:18px 8px;color:var(--text-light);font-size:.85rem;text-align:center;font-style:italic">
+        Aún no hay entregas para este texto.
+      </div>`;
+
+    return`
+    <div class="reading-card" style="animation:fadeUp .4s ${i*.08}s ease both;flex-direction:column;gap:0">
+      <div style="display:flex;gap:16px;align-items:flex-start;width:100%">
+        <div class="reading-type-badge ${tb[t.type]||'badge-texto'}">${te[t.type]||'📄'}</div>
+        <div class="reading-body">
+          <div class="week-tag">Semana ${t.week||'—'}</div>
+          <div class="reading-title">${t.title}</div>
+          <div class="reading-meta">
+            <span>📝 ${t.type.charAt(0).toUpperCase()+t.type.slice(1)}</span>
+            <span>🎒 ${currentGrade}° · ${currentSection}</span>
+          </div>
+          <div class="reading-questions">❓ ${t.questions.length} pregunta${t.questions.length!==1?'s':''}</div>
+        </div>
+        <div class="reading-actions">
+          <button class="btn-sm btn-edit" onclick="openEdit(${i})">✏️ Editar</button>
+          <button class="btn-sm btn-delete" onclick="openDelete(${i})">🗑 Eliminar</button>
+        </div>
+      </div>
+
+      <!-- Tareas entregadas -->
+      <div style="margin-top:14px;border-top:1px solid rgba(60,30,10,.08);padding-top:12px;width:100%">
+        <button class="submissions-toggle-btn" onclick="toggleSubmissions('sub-${t.id}',this)">
+          <span>📋 Tareas entregadas</span>
+          <div style="display:flex;gap:6px;align-items:center;margin-left:8px">
+            ${resps.length>0?`<span class="submissions-badge badge-has">${resps.length} entrega${resps.length!==1?'s':''}</span>`:'<span class="submissions-badge badge-empty">0 entregas</span>'}
+            ${pending>0?`<span class="submissions-badge" style="background:#FFF3E0;color:#E65100;border:1px solid #FFCC80">${pending} por calificar</span>`:''}
+            ${reviewed>0?`<span class="submissions-badge" style="background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7">${reviewed} calificada${reviewed!==1?'s':''}</span>`:''}
+          </div>
+          <span class="sub-chevron" style="margin-left:auto;font-size:.75rem;color:var(--forest);transition:transform .3s">▼</span>
+        </button>
+        <div id="sub-${t.id}" style="display:none;margin-top:12px">
+          ${submissionsHTML}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  bindCursor();
+}
+
+function toggleSubmissions(id,btn){
+  const el=document.getElementById(id);
+  const open=el.style.display==='block';
+  if(!open){
+    el.style.display='block';
+    el.innerHTML='<div style="padding:16px;text-align:center;color:#888;font-size:.85rem">⏳ Cargando entregas...</div>';
+    btn.querySelector('.sub-chevron').style.transform='rotate(180deg)';
+    cargarRespuestasFirebase().then(()=>{
+      renderTextList();
+      const el2=document.getElementById(id);
+      if(el2){el2.style.display='block';btn.querySelector('.sub-chevron').style.transform='rotate(180deg)';}
+    });
+  } else {
+    el.style.display='none';
+    btn.querySelector('.sub-chevron').style.transform='rotate(0deg)';
+  }
+}
+
+// ── Review Modal ──
+let reviewTextId=null, reviewTextTitle=null, reviewRespIdx=null;
+
+async function openReviewModal(respIdx, textTitle){
+  reviewTextTitle=textTitle; reviewRespIdx=parseInt(respIdx);
+  await cargarRespuestasFirebase();
+  const resps=familyResponses.filter(r=>String(r.grade)===String(currentGrade)&&String(r.section)===String(currentSection)&&r.text===textTitle);
+  const resp=resps[reviewRespIdx];
+  if(!resp){toast('⚠️ No se encontró la respuesta. Intenta de nuevo.','#E65100');return;}
+  const existing=resp.grade_minedu||'';
+  const existingComment=resp.teacher_comment||'';
+
+  document.getElementById('review-student-name').textContent=resp.student;
+  document.getElementById('review-comment').value=existingComment;
+
+  // Render scale buttons
+  document.getElementById('review-scale-btns').innerHTML=MINEDU_SCALE.map(s=>`
+    <button class="scale-btn ${existing===s.code?'scale-btn-active':''}"
+      style="--sc:${s.color};--sb:${s.bg};--sbd:${s.border}"
+      onclick="selectScale('${s.code}',this)">
+      <span class="scale-code">${s.code}</span>
+      <span class="scale-label">${s.label}</span>
+      <span class="scale-desc">${s.desc}</span>
+    </button>`).join('');
+
+  document.getElementById('review-modal').classList.add('open');
+  document.getElementById('review-save-btn').dataset.selected=existing;
+  bindCursor();
+}
+
+function selectScale(code,btn){
+  document.querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('scale-btn-active'));
+  btn.classList.add('scale-btn-active');
+  document.getElementById('review-save-btn').dataset.selected=code;
+}
+
+function saveReview(){
+  const code=document.getElementById('review-save-btn').dataset.selected;
+  if(!code){toast('⚠️ Selecciona una calificación','#E65100');return;}
+  const comment=document.getElementById('review-comment').value.trim();
+  const resps=familyResponses.filter(r=>String(r.grade)===String(currentGrade)&&String(r.section)===String(currentSection)&&r.text===reviewTextTitle);
+  if(resps[reviewRespIdx]){
+    resps[reviewRespIdx].grade_minedu=code;
+    resps[reviewRespIdx].teacher_comment=comment;
+    resps[reviewRespIdx].reviewed_at=new Date().toLocaleDateString('es-PE');
+    // Guardar calificación en Firebase
+    guardarCalificacionFirebase(resps[reviewRespIdx], code, comment);
+  }
+  closeReviewModal();
+  renderTextList();
+  const sc=getScaleInfo(code);
+  toast(`✅ Calificado: ${sc.code} — ${sc.label}`,'#2D6A4F');
+}
+
+async function verGrafico(){
+  const panel = document.getElementById('grafico-panel');
+  const cont = document.getElementById('grafico-contenido');
+  if(panel.style.display==='block'){panel.style.display='none';return;}
+  panel.style.display='block';
+  cont.innerHTML='<div style="padding:16px;text-align:center;color:#888">⏳ Cargando datos...</div>';
+  try{
+    const res = await fetch(`${FB_URL}/calificaciones.json`);
+    const data = await res.json();
+    if(!data){cont.innerHTML='<div style="padding:16px;color:#888;text-align:center">Aún no hay calificaciones.</div>';return;}
+    const todas = Object.values(data).filter(c=>String(c.grado)===String(currentGrade)&&String(c.seccion)===String(currentSection));
+    if(!todas.length){cont.innerHTML='<div style="padding:16px;color:#888;text-align:center">Aún no hay calificaciones para este grupo.</div>';return;}
+
+    const niveles = ['AD','A','B','C'];
+    const colores = {'AD':'#1565C0','A':'#2E7D32','B':'#E65100','C':'#B71C1C'};
+    const labels = {'AD':'Logro Destacado','A':'Logro Esperado','B':'En Proceso','C':'En Inicio'};
+    // Count unique students (use most recent grade per student)
+    const estudiantesUnicos = {};
+    todas.forEach(c=>{
+      const key = c.nombre+'_'+(c.semana||c.fecha||'');
+      estudiantesUnicos[key] = c.calificacion;
+    });
+    const totales = {'AD':0,'A':0,'B':0,'C':0};
+    // Count by unique student (if same student appears multiple times, count once per semana)
+    const estudiantesSemana = {};
+    todas.forEach(c=>{
+      const key = c.nombre;
+      if(!estudiantesSemana[key]) estudiantesSemana[key]=[];
+      if(!estudiantesSemana[key].includes(c.semana||c.fecha||''))
+        estudiantesSemana[key].push(c.semana||c.fecha||'');
+    });
+    // Use latest grade per student
+    const ultimaCalif = {};
+    todas.sort((a,b)=>((a.semana||a.fecha||'')>(b.semana||b.fecha||''))?1:-1)
+         .forEach(c=>{ ultimaCalif[c.nombre]=c.calificacion; });
+    Object.values(ultimaCalif).forEach(cal=>{ if(totales[cal]!==undefined) totales[cal]++; });
+    const total = Object.values(totales).reduce((a,b)=>a+b,0);
+
+    // Build SVG donut chart
+    const cx=120, cy=120, r=90, strokeW=36;
+    const circum = 2*Math.PI*r;
+    let offset = 0;
+    let segments = '';
+    let pct_acum = 0;
+
+    niveles.forEach(n=>{
+      const count = totales[n];
+      if(count===0) return;
+      const pct = count/total;
+      const dash = pct*circum;
+      const gap = circum - dash;
+      segments += `<circle
+        cx="${cx}" cy="${cy}" r="${r}"
+        fill="none"
+        stroke="${colores[n]}"
+        stroke-width="${strokeW}"
+        stroke-dasharray="${dash} ${gap}"
+        stroke-dashoffset="${-offset*circum}"
+        style="transition:all .6s ease"
+        transform="rotate(-90 ${cx} ${cy})">
+        <title>${n} — ${labels[n]}: ${count} estudiantes</title>
+      </circle>`;
+      offset += pct;
+    });
+
+    // Get week data for evolution
+    const semanas = [...new Set(todas.map(c=>c.semana||'Sin semana'))].sort();
+    const semanaLabel = {};
+    semanas.forEach((s,i)=>{ semanaLabel[s]='Sem. '+(i+1); });
+
+    const porSemana = {};
+    semanas.forEach(s=>{
+      porSemana[s]={'AD':0,'A':0,'B':0,'C':0};
+      // Count unique students per week (avoid duplicates)
+      const vistos = new Set();
+      todas.filter(c=>(c.semana||'Sin semana')===s).forEach(c=>{
+        if(!vistos.has(c.nombre)){
+          vistos.add(c.nombre);
+          if(porSemana[s][c.calificacion]!==undefined) porSemana[s][c.calificacion]++;
+        }
+      });
+    });
+
+    let html = `
+    <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.08)">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text-dark);margin-bottom:16px;text-align:center">
+        Distribución de niveles — ${currentGrade}° ${currentSection}
+      </h3>
+      <div style="display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap">
+        
+        <!-- Donut SVG -->
+        <div style="position:relative;width:240px;height:240px;flex-shrink:0">
+          <svg viewBox="0 0 240 240" width="240" height="240">
+            <!-- Background circle -->
+            <circle cx="120" cy="120" r="90" fill="none" stroke="#F5F5F5" stroke-width="36"/>
+            ${segments}
+            <!-- Center text -->
+            <text x="120" y="112" text-anchor="middle" font-family="Playfair Display,serif" font-size="28" font-weight="900" fill="#1A1008">${total}</text>
+            <text x="120" y="132" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#888">calificaciones</text>
+          </svg>
+        </div>
+
+        <!-- Legend -->
+        <div style="display:flex;flex-direction:column;gap:12px">
+          ${niveles.map(n=>{
+            const count = totales[n];
+            const pct = total>0?Math.round((count/total)*100):0;
+            return `
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:16px;height:16px;border-radius:50%;background:${colores[n]};flex-shrink:0"></div>
+              <div>
+                <div style="font-weight:900;font-size:.9rem;color:${colores[n]}">${n} — ${labels[n]}</div>
+                <div style="font-size:.8rem;color:#888">${count} estudiante${count!==1?'s':''} (${pct}%)</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    ${semanas.length>0?`
+    <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-top:16px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text-dark);margin-bottom:16px;text-align:center">
+        Evolución por semana
+      </h3>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        ${semanas.map(s=>{
+          const tot = Object.values(porSemana[s]).reduce((a,b)=>a+b,0);
+          if(tot===0) return '';
+          const cx2=60,cy2=60,r2=48,sw2=20,circ2=2*Math.PI*r2;
+          let off2=0, segs2='';
+          niveles.forEach(n=>{
+            const c=porSemana[s][n];
+            if(c===0)return;
+            const p=c/tot;
+            const d=p*circ2;
+            segs2+=`<circle cx="${cx2}" cy="${cy2}" r="${r2}" fill="none" stroke="${colores[n]}" stroke-width="${sw2}" stroke-dasharray="${d} ${circ2-d}" stroke-dashoffset="${-off2*circ2}" transform="rotate(-90 ${cx2} ${cy2})"><title>${n}: ${c}</title></circle>`;
+            off2+=p;
+          });
+          return `
+          <div style="text-align:center">
+            <svg viewBox="0 0 120 120" width="100" height="100">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="#F5F5F5" stroke-width="20"/>
+              ${segs2}
+              <text x="60" y="64" text-anchor="middle" font-family="Nunito,sans-serif" font-size="16" font-weight="900" fill="#1A1008">${tot}</text>
+            </svg>
+            <div style="font-size:.75rem;font-weight:800;color:var(--forest)">${semanaLabel[s]}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`:''}`;
+
+    cont.innerHTML = html;
+
+  }catch(e){
+    cont.innerHTML='<div style="color:red;padding:16px">Error cargando datos.</div>';
+    console.warn(e);
+  }
+}
+
+
+async function verCalificaciones(){
+  const panel = document.getElementById('calificaciones-panel');
+  const lista = document.getElementById('calificaciones-lista');
+  if(panel.style.display==='block'){panel.style.display='none';return;}
+  panel.style.display='block';
+  await renderCalificaciones();
+}
+
+async function renderCalificaciones(){
+  const lista = document.getElementById('calificaciones-lista');
+  lista.innerHTML='<div style="padding:16px;text-align:center;color:#888">⏳ Cargando calificaciones...</div>';
+  try{
+    const res = await fetch(`${FB_URL}/calificaciones.json`);
+    const data = await res.json();
+    if(!data){lista.innerHTML='<div style="padding:16px;color:#888;text-align:center">Aún no hay calificaciones guardadas.</div>';return;}
+    
+    // Keep all entries with their keys
+    const entries = Object.entries(data).filter(([k,c])=>String(c.grado)===String(currentGrade)&&String(c.seccion)===String(currentSection));
+    
+    if(!entries.length){lista.innerHTML='<div style="padding:16px;color:#888;text-align:center">Aún no hay calificaciones para este grado y sección.</div>';return;}
+
+    const todas = entries.map(([k,c])=>({...c,_key:k}));
+    const semanasSet = [...new Set(todas.map(c=>c.semana||c.fecha||'Sin semana'))].sort();
+    const semanaLabel = {};
+    semanasSet.forEach((s,i)=>{ semanaLabel[s]='Semana '+(i+1); });
+    const estudiantes = [...new Set(todas.map(c=>c.nombre))].sort();
+    const colores = {'AD':'#1565C0','A':'#2E7D32','B':'#E65100','C':'#B71C1C'};
+    const bgColores = {'AD':'#E3F2FD','A':'#E8F5E9','B':'#FFF3E0','C':'#FFEBEE'};
+    const nivelesLabel = {'AD':'AD — Logro Destacado','A':'A — Logro Esperado','B':'B — En Proceso','C':'C — En Inicio'};
+
+    let html = `
+    <div style="overflow-x:auto;margin-top:8px">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button onclick="exportarPDF()" style="background:#C62828;color:white;border:none;padding:10px 20px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer">
+          📄 Exportar a PDF
+        </button>
+      </div>
+      <table id="tabla-calificaciones" style="width:100%;border-collapse:collapse;font-family:'Nunito',sans-serif;font-size:.85rem">
+        <thead>
+          <tr style="background:#2D6A4F;color:white">
+            <th style="padding:12px 16px;text-align:left;border-radius:10px 0 0 0;min-width:180px">👤 Estudiante</th>
+            <th style="padding:12px 16px;text-align:center;min-width:100px">Promedio</th>
+            ${semanasSet.map(s=>`<th style="padding:12px 16px;text-align:center;min-width:120px">${semanaLabel[s]}<div style="font-size:.7rem;font-weight:400;opacity:.8">${s}</div></th>`).join('')}
+            <th style="padding:12px 16px;text-align:center;border-radius:0 10px 0 0;min-width:100px;position:sticky;right:0;background:#2D6A4F">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${estudiantes.map((est,ei)=>{
+            const calxSemana = {};
+            const keyxSemana = {};
+            const orden = {'AD':4,'A':3,'B':2,'C':1};
+            const estEntries = todas.filter(c=>c.nombre===est);
+            estEntries.forEach(c=>{
+              const sem = c.semana||c.fecha||'Sin semana';
+              calxSemana[sem]=c.calificacion;
+              keyxSemana[sem]=c._key;
+            });
+            const notas = semanasSet.map(s=>calxSemana[s]||'—');
+            const notasValidas = notas.filter(n=>n!=='—');
+            const promNum = notasValidas.length?Math.round(notasValidas.reduce((a,n)=>a+(orden[n]||0),0)/notasValidas.length):0;
+            const promLabel = promNum===4?'AD':promNum===3?'A':promNum===2?'B':promNum===1?'C':'—';
+            const bgRow = ei%2===0?'white':'#FAFAFA';
+            // Get all keys for this student
+            const allKeys = estEntries.map(c=>c._key).filter(k=>k).join(',');
+            return `<tr style="background:${bgRow};border-bottom:1px solid #EEE">
+              <td style="padding:10px 16px;font-weight:700">${est}</td>
+              <td style="text-align:center;padding:8px">${promLabel!=='—'?`<span style="display:inline-block;padding:4px 14px;border-radius:20px;background:${bgColores[promLabel]};color:${colores[promLabel]};font-weight:900">${promLabel}</span>`:'<span style="color:#CCC">—</span>'}</td>
+              ${semanasSet.map(s=>{
+                const cal=calxSemana[s]||'—';
+                return cal!=='—'
+                  ?`<td style="text-align:center;padding:8px"><span style="display:inline-block;padding:4px 12px;border-radius:20px;background:${bgColores[cal]};color:${colores[cal]};font-weight:800;font-size:.82rem">${cal}</span></td>`
+                  :`<td style="text-align:center;color:#CCC;padding:8px">—</td>`;
+              }).join('')}
+              <td style="text-align:center;padding:8px;position:sticky;right:0;background:white">
+                <button onclick="eliminarEstudiante(this)" data-keys="${allKeys}" data-nombre="${est}" style="background:#B71C1C;color:white;border:none;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:.75rem;font-weight:700;font-family:'Nunito',sans-serif">🗑️ Eliminar</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:.75rem;color:#999;display:flex;gap:16px;flex-wrap:wrap">
+      <span>🔵 <strong>AD</strong> — Logro Destacado</span>
+      <span>🟢 <strong>A</strong> — Logro Esperado</span>
+      <span>🟠 <strong>B</strong> — En Proceso</span>
+      <span>🔴 <strong>C</strong> — En Inicio</span>
+    </div>`;
+
+    lista.innerHTML = html;
+  }catch(e){
+    lista.innerHTML='<div style="color:red;padding:16px">Error cargando calificaciones.</div>';
+    console.warn(e);
+  }
+}
+
+async function eliminarEstudiante(btn){
+  const keys = btn.dataset.keys;
+  const nombre = btn.dataset.nombre;
+  if(!confirm('¿Eliminar todas las calificaciones de '+nombre+'? Esta acción no se puede deshacer.')) return;
+  try{
+    const keysArr = keys.split(',').filter(k=>k);
+    for(const key of keysArr){
+      await fetch(`${FB_URL}/calificaciones/${key}.json`,{method:'DELETE'});
+    }
+    toast(`✅ Calificaciones de ${nombre} eliminadas`,'#2D6A4F');
+    await renderCalificaciones();
+  }catch(e){
+    toast('⚠️ Error al eliminar','#E65100');
+    console.warn(e);
+  }
+}
+
+
+function exportarPDF(){
+  const tabla = document.getElementById('tabla-calificaciones');
+  if(!tabla){toast('⚠️ Primero abre la vista de calificaciones','#E65100');return;}
+
+  const win = window.open('','_blank');
+  const fecha = new Date().toLocaleDateString('es-PE');
+  const titulo = `Calificaciones ${currentGrade}° ${currentSection} — ${fecha}`;
+
+  // Get table HTML
+  const tableHTML = tabla.outerHTML;
+
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${titulo}</title>
+<style>
+  body{font-family:Arial,sans-serif;padding:24px;color:#1A1008}
+  h2{color:#2D6A4F;font-size:1.1rem;margin-bottom:4px}
+  p{font-size:.85rem;color:#888;margin-bottom:16px}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  th{background:#2D6A4F;color:white;padding:10px 12px;text-align:center}
+  th:first-child{text-align:left}
+  td{padding:8px 12px;border-bottom:1px solid #EEE;text-align:center}
+  td:first-child{text-align:left;font-weight:700}
+  tr:nth-child(even){background:#FAFAFA}
+  .leyenda{margin-top:20px;font-size:.78rem;color:#666;border-top:1px solid #EEE;padding-top:12px}
+  .leyenda span{margin-right:16px;font-weight:700}
+  @media print{button{display:none}}
+</style>
+</head>
+<body>
+<button onclick="window.print()" style="background:#2D6A4F;color:white;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;margin-bottom:16px;font-size:.85rem">🖨️ Imprimir / Guardar PDF</button>
+<h2>📊 Registro de Calificaciones — ${titulo}</h2>
+<p>Generado el ${fecha}</p>
+${tableHTML}
+<div class="leyenda">
+  <strong>Escala MINEDU:</strong>
+  <span style="color:#1565C0">AD — Logro Destacado</span>
+  <span style="color:#2E7D32">A — Logro Esperado</span>
+  <span style="color:#E65100">B — En Proceso</span>
+  <span style="color:#B71C1C">C — En Inicio</span>
+</div>
+</body></html>`);
+  win.document.close();
+  toast('✅ PDF listo para imprimir','#2D6A4F');
+}
+
+
+async function verGrafico(){
+  const panel = document.getElementById('grafico-panel');
+  const cont = document.getElementById('grafico-contenido');
+  if(panel.style.display==='block'){panel.style.display='none';return;}
+  panel.style.display='block';
+  cont.innerHTML='<div style="padding:16px;text-align:center;color:#888">⏳ Cargando datos...</div>';
+  try{
+    const res = await fetch(`${FB_URL}/calificaciones.json`);
+    const data = await res.json();
+    if(!data){cont.innerHTML='<div style="padding:16px;color:#888;text-align:center">Aún no hay calificaciones.</div>';return;}
+    const todas = Object.values(data).filter(c=>String(c.grado)===String(currentGrade)&&String(c.seccion)===String(currentSection));
+    if(!todas.length){cont.innerHTML='<div style="padding:16px;color:#888;text-align:center">Aún no hay calificaciones para este grupo.</div>';return;}
+
+    const niveles = ['AD','A','B','C'];
+    const colores = {'AD':'#1565C0','A':'#2E7D32','B':'#E65100','C':'#B71C1C'};
+    const labels = {'AD':'Logro Destacado','A':'Logro Esperado','B':'En Proceso','C':'En Inicio'};
+    // Count unique students (use most recent grade per student)
+    const estudiantesUnicos = {};
+    todas.forEach(c=>{
+      const key = c.nombre+'_'+(c.semana||c.fecha||'');
+      estudiantesUnicos[key] = c.calificacion;
+    });
+    const totales = {'AD':0,'A':0,'B':0,'C':0};
+    // Count by unique student (if same student appears multiple times, count once per semana)
+    const estudiantesSemana = {};
+    todas.forEach(c=>{
+      const key = c.nombre;
+      if(!estudiantesSemana[key]) estudiantesSemana[key]=[];
+      if(!estudiantesSemana[key].includes(c.semana||c.fecha||''))
+        estudiantesSemana[key].push(c.semana||c.fecha||'');
+    });
+    // Use latest grade per student
+    const ultimaCalif = {};
+    todas.sort((a,b)=>((a.semana||a.fecha||'')>(b.semana||b.fecha||''))?1:-1)
+         .forEach(c=>{ ultimaCalif[c.nombre]=c.calificacion; });
+    Object.values(ultimaCalif).forEach(cal=>{ if(totales[cal]!==undefined) totales[cal]++; });
+    const total = Object.values(totales).reduce((a,b)=>a+b,0);
+
+    // Build SVG donut chart
+    const cx=120, cy=120, r=90, strokeW=36;
+    const circum = 2*Math.PI*r;
+    let offset = 0;
+    let segments = '';
+    let pct_acum = 0;
+
+    niveles.forEach(n=>{
+      const count = totales[n];
+      if(count===0) return;
+      const pct = count/total;
+      const dash = pct*circum;
+      const gap = circum - dash;
+      segments += `<circle
+        cx="${cx}" cy="${cy}" r="${r}"
+        fill="none"
+        stroke="${colores[n]}"
+        stroke-width="${strokeW}"
+        stroke-dasharray="${dash} ${gap}"
+        stroke-dashoffset="${-offset*circum}"
+        style="transition:all .6s ease"
+        transform="rotate(-90 ${cx} ${cy})">
+        <title>${n} — ${labels[n]}: ${count} estudiantes</title>
+      </circle>`;
+      offset += pct;
+    });
+
+    // Get week data for evolution
+    const semanas = [...new Set(todas.map(c=>c.semana||'Sin semana'))].sort();
+    const semanaLabel = {};
+    semanas.forEach((s,i)=>{ semanaLabel[s]='Sem. '+(i+1); });
+
+    const porSemana = {};
+    semanas.forEach(s=>{
+      porSemana[s]={'AD':0,'A':0,'B':0,'C':0};
+      // Count unique students per week (avoid duplicates)
+      const vistos = new Set();
+      todas.filter(c=>(c.semana||'Sin semana')===s).forEach(c=>{
+        if(!vistos.has(c.nombre)){
+          vistos.add(c.nombre);
+          if(porSemana[s][c.calificacion]!==undefined) porSemana[s][c.calificacion]++;
+        }
+      });
+    });
+
+    let html = `
+    <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.08)">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text-dark);margin-bottom:16px;text-align:center">
+        Distribución de niveles — ${currentGrade}° ${currentSection}
+      </h3>
+      <div style="display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap">
+        
+        <!-- Donut SVG -->
+        <div style="position:relative;width:240px;height:240px;flex-shrink:0">
+          <svg viewBox="0 0 240 240" width="240" height="240">
+            <!-- Background circle -->
+            <circle cx="120" cy="120" r="90" fill="none" stroke="#F5F5F5" stroke-width="36"/>
+            ${segments}
+            <!-- Center text -->
+            <text x="120" y="112" text-anchor="middle" font-family="Playfair Display,serif" font-size="28" font-weight="900" fill="#1A1008">${total}</text>
+            <text x="120" y="132" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#888">calificaciones</text>
+          </svg>
+        </div>
+
+        <!-- Legend -->
+        <div style="display:flex;flex-direction:column;gap:12px">
+          ${niveles.map(n=>{
+            const count = totales[n];
+            const pct = total>0?Math.round((count/total)*100):0;
+            return `
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:16px;height:16px;border-radius:50%;background:${colores[n]};flex-shrink:0"></div>
+              <div>
+                <div style="font-weight:900;font-size:.9rem;color:${colores[n]}">${n} — ${labels[n]}</div>
+                <div style="font-size:.8rem;color:#888">${count} estudiante${count!==1?'s':''} (${pct}%)</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    ${semanas.length>0?`
+    <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-top:16px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--text-dark);margin-bottom:16px;text-align:center">
+        Evolución por semana
+      </h3>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        ${semanas.map(s=>{
+          const tot = Object.values(porSemana[s]).reduce((a,b)=>a+b,0);
+          if(tot===0) return '';
+          const cx2=60,cy2=60,r2=48,sw2=20,circ2=2*Math.PI*r2;
+          let off2=0, segs2='';
+          niveles.forEach(n=>{
+            const c=porSemana[s][n];
+            if(c===0)return;
+            const p=c/tot;
+            const d=p*circ2;
+            segs2+=`<circle cx="${cx2}" cy="${cy2}" r="${r2}" fill="none" stroke="${colores[n]}" stroke-width="${sw2}" stroke-dasharray="${d} ${circ2-d}" stroke-dashoffset="${-off2*circ2}" transform="rotate(-90 ${cx2} ${cy2})"><title>${n}: ${c}</title></circle>`;
+            off2+=p;
+          });
+          return `
+          <div style="text-align:center">
+            <svg viewBox="0 0 120 120" width="100" height="100">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="#F5F5F5" stroke-width="20"/>
+              ${segs2}
+              <text x="60" y="64" text-anchor="middle" font-family="Nunito,sans-serif" font-size="16" font-weight="900" fill="#1A1008">${tot}</text>
+            </svg>
+            <div style="font-size:.75rem;font-weight:800;color:var(--forest)">${semanaLabel[s]}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`:''}`;
+
+    cont.innerHTML = html;
+
+  }catch(e){
+    cont.innerHTML='<div style="color:red;padding:16px">Error cargando datos.</div>';
+    console.warn(e);
+  }
+}
+
+
+async function verCalificaciones(){
+  const panel = document.getElementById('calificaciones-panel');
+  const lista = document.getElementById('calificaciones-lista');
+  if(panel.style.display==='block'){panel.style.display='none';return;}
+  panel.style.display='block';
+  lista.innerHTML='<div style="padding:16px;text-align:center;color:#888">⏳ Cargando calificaciones...</div>';
+  try{
+    const res = await fetch(`${FB_URL}/calificaciones.json`);
+    const data = await res.json();
+    if(!data){
+      lista.innerHTML='<div style="padding:16px;color:#888;text-align:center">Aún no hay calificaciones guardadas.</div>';
+      return;
+    }
+    const todas = Object.values(data).filter(c=>
+      String(c.grado)===String(currentGrade) && String(c.seccion)===String(currentSection)
+    );
+    if(!todas.length){
+      lista.innerHTML='<div style="padding:16px;color:#888;text-align:center">Aún no hay calificaciones para este grado y sección.</div>';
+      return;
+    }
+
+    // Obtener semanas únicas ordenadas
+    const semanasSet = [...new Set(todas.map(c=>c.semana||c.fecha||'Sin semana'))].sort();
+    
+    // Etiquetar semanas como Semana 1, Semana 2, etc.
+    const semanaLabel = {};
+    semanasSet.forEach((s,i) => { semanaLabel[s] = 'Semana '+(i+1); });
+
+    // Obtener estudiantes únicos ordenados
+    const estudiantes = [...new Set(todas.map(c=>c.nombre))].sort();
+
+    // Colores por calificación
+    const colores = {'AD':'#1B5E20','A':'#2E7D32','B':'#E65100','C':'#B71C1C'};
+    const bgColores = {'AD':'#E8F5E9','A':'#F1F8E9','B':'#FFF3E0','C':'#FFEBEE'};
+
+    // Construir tabla
+    let html = `
+    <div style="overflow-x:auto;margin-top:8px">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button onclick="exportarPDF()" style="background:#C62828;color:white;border:none;padding:10px 20px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:8px">
+          📄 Exportar a PDF
+        </button>
+      </div>
+      <table id="tabla-calificaciones" style="width:100%;border-collapse:collapse;font-family:'Nunito',sans-serif;font-size:.85rem">
+        <thead>
+          <tr style="background:var(--forest,#2D6A4F);color:white">
+            <th style="padding:12px 16px;text-align:left;border-radius:10px 0 0 0;min-width:180px">👤 Estudiante</th>
+            ${semanasSet.map(s=>`<th style="padding:12px 16px;text-align:center;min-width:110px">${semanaLabel[s]}<div style="font-size:.7rem;font-weight:400;opacity:.8">${s}</div></th>`).join('')}
+            <th style="padding:12px 16px;text-align:center;min-width:100px">Promedio</th>
+            <th style="padding:12px 16px;text-align:center;border-radius:0 10px 0 0;min-width:140px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${estudiantes.map((est,ei)=>{
+            const calxSemana = {};
+            todas.filter(c=>c.nombre===est).forEach(c=>{
+              calxSemana[c.semana||c.fecha||'Sin semana'] = c.calificacion;
+            });
+            const notas = semanasSet.map(s=>calxSemana[s]||'—');
+            const notasValidas = notas.filter(n=>n!=='—');
+            const orden = {'AD':4,'A':3,'B':2,'C':1};
+            const promNum = notasValidas.length ? Math.round(notasValidas.reduce((a,n)=>a+(orden[n]||0),0)/notasValidas.length) : 0;
+            const promLabel = promNum===4?'AD':promNum===3?'A':promNum===2?'B':promNum===1?'C':'—';
+            const bgRow = ei%2===0?'white':'#FAFAFA';
+            return `<tr style="background:${bgRow};border-bottom:1px solid #EEE">
+              <td style="padding:10px 16px;font-weight:700">${est}</td>
+              ${semanasSet.map(s=>{
+                const cal = calxSemana[s]||'—';
+                return cal!=='—'
+                  ? `<td style="text-align:center;padding:8px"><span style="display:inline-block;padding:4px 12px;border-radius:20px;background:${bgColores[cal]||'#EEE'};color:${colores[cal]||'#555'};font-weight:800;font-size:.82rem">${cal}</span></td>`
+                  : `<td style="text-align:center;color:#CCC;padding:8px">—</td>`;
+              }).join('')}
+              <td style="text-align:center;padding:8px">${promLabel!=='—'?`<span style="display:inline-block;padding:4px 14px;border-radius:20px;background:${bgColores[promLabel]||'#EEE'};color:${colores[promLabel]||'#555'};font-weight:900">${promLabel}</span>`:'<span style="color:#CCC">—</span>'}</td>
+              <td style="text-align:center;padding:8px">
+                <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+                  <button onclick="abrirEditarCalificacion(this)" data-nombre="${est.replace(/"/g,'&quot;')}" data-semanas="${semanasSet.join('|')}" style="background:#FFF8E1;color:#E65100;border:1.5px solid #FFE082;padding:5px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.72rem;cursor:pointer;transition:all .2s" onmouseover="this.style.background='#E65100';this.style.color='white'" onmouseout="this.style.background='#FFF8E1';this.style.color='#E65100'">✏️ Editar</button>
+                  <button onclick="eliminarCalificacion(this)" data-nombre="${est.replace(/"/g,'&quot;')}" style="background:#FFEBEE;color:#C62828;border:1.5px solid #FFCDD2;padding:5px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.72rem;cursor:pointer;transition:all .2s" onmouseover="this.style.background='#C62828';this.style.color='white'" onmouseout="this.style.background='#FFEBEE';this.style.color='#C62828'">🗑 Eliminar</button>
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:.75rem;color:#999;display:flex;gap:16px;flex-wrap:wrap">
+      <span>🔵 <strong>AD</strong> — Logro Destacado</span>
+      <span>🟢 <strong>A</strong> — Logro Esperado</span>
+      <span>🟠 <strong>B</strong> — En Proceso</span>
+      <span>🔴 <strong>C</strong> — En Inicio</span>
+    </div>`;
+
+    lista.innerHTML = html;
+
+  }catch(e){
+    lista.innerHTML='<div style="color:red;padding:16px">Error cargando calificaciones. Intenta de nuevo.</div>';
+    console.warn(e);
+  }
+}
+
+async function eliminarCalificacion(btn){
+  const nombre = btn.dataset.nombre;
+  if(!nombre){toast('⚠️ Error: nombre no encontrado','#C62828');return;}
+  if(!confirm(`¿Eliminar TODAS las calificaciones de "${nombre}"?\nEsta acción no se puede deshacer.`))return;
+  btn.disabled=true; btn.textContent='⏳...';
+  try{
+    const res = await fetch(`${FB_URL}/calificaciones.json`);
+    const data = await res.json();
+    if(!data){toast('No hay calificaciones que eliminar','#888');btn.disabled=false;btn.textContent='🗑 Eliminar';return;}
+    const keysAEliminar = Object.entries(data)
+      .filter(([k,v])=>
+        v.nombre===nombre &&
+        String(v.grado)===String(currentGrade) &&
+        String(v.seccion)===String(currentSection)
+      )
+      .map(([k])=>k);
+    if(!keysAEliminar.length){toast('⚠️ No se encontraron registros','#E65100');btn.disabled=false;btn.textContent='🗑 Eliminar';return;}
+    await Promise.all(keysAEliminar.map(k=>
+      fetch(`${FB_URL}/calificaciones/${k}.json`,{method:'DELETE'})
+    ));
+    toast('🗑️ Calificaciones de "'+nombre+'" eliminadas','#C62828');
+    // Recargar tabla
+    const panel = document.getElementById('calificaciones-panel');
+    panel.style.display='none';
+    setTimeout(()=>verCalificaciones(), 400);
+  }catch(e){
+    toast('⚠️ Error al eliminar. Revisa la conexión.','#C62828');
+    console.warn('eliminarCalificacion error:',e);
+    btn.disabled=false; btn.textContent='🗑 Eliminar';
+  }
+}
+
+async function abrirEditarCalificacion(btn){
+  const nombre = btn.dataset.nombre;
+  const semanasStr = btn.dataset.semanas||'';
+  const semanas = semanasStr.split('|').filter(Boolean);
+  if(!nombre){toast('⚠️ Error: nombre no encontrado','#C62828');return;}
+  btn.disabled=true; btn.textContent='⏳...';
+  try{
+    const res = await fetch(`${FB_URL}/calificaciones.json`);
+    const data = await res.json();
+    btn.disabled=false; btn.textContent='✏️ Editar';
+    if(!data){toast('⚠️ No hay datos en Firebase','#E65100');return;}
+
+    // Guardar todos los registros de este estudiante con su key de Firebase
+    const registros = Object.entries(data)
+      .filter(([k,v])=>
+        v.nombre===nombre &&
+        String(v.grado)===String(currentGrade) &&
+        String(v.seccion)===String(currentSection)
+      )
+      .map(([k,v])=>({fbKey:k, semana:(v.semana||v.fecha||'Sin semana'), calificacion:v.calificacion}));
+
+    if(!registros.length){toast('⚠️ No se encontraron registros para este estudiante','#E65100');return;}
+
+    // Guardar referencia global para usarla al guardar
+    window._calEditData = {nombre, registros};
+
+    const escala = ['AD','A','B','C'];
+    const semanaLabel = {};
+    semanas.forEach((s,i)=>{semanaLabel[s]='Semana '+(i+1);});
+
+    const filas = semanas.map((s,idx)=>{
+      const reg = registros.find(r=>r.semana===s);
+      const calActual = reg?reg.calificacion:'';
+      const opts = ['','AD','A','B','C'].map(e=>`<option value="${e}"${calActual===e?' selected':''}>${e||'— Sin nota —'}</option>`).join('');
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #EEE">
+        <span style="flex:1;font-size:.88rem;color:#4A3520"><strong>${semanaLabel[s]||'Semana '+(idx+1)}</strong><br><span style="font-size:.75rem;color:#AAA">${s}</span></span>
+        <select data-semana="${s}" data-fbkey="${reg?reg.fbKey:''}" style="padding:7px 12px;border:2px solid rgba(60,30,10,.15);border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.88rem;outline:none;background:#FEFCF7;color:#1A1008">
+          ${opts}
+        </select>
+      </div>`;
+    }).join('');
+
+    // Crear o reutilizar modal
+    let modal = document.getElementById('cal-edit-modal');
+    if(modal) modal.remove();
+    modal = document.createElement('div');
+    modal.id = 'cal-edit-modal';
+    modal.style.cssText='display:flex;position:fixed;inset:0;background:rgba(26,16,8,.56);z-index:9000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)';
+    modal.innerHTML=`
+      <div style="background:#FEFCF7;border-radius:24px;padding:32px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(60,30,10,.3);animation:loginIn .35s cubic-bezier(.34,1.56,.64,1) both">
+        <div style="font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:#1A1008;margin-bottom:4px">✏️ Editar calificaciones</div>
+        <div style="font-size:.83rem;color:#8A7060;margin-bottom:20px">Estudiante: <strong>${nombre}</strong> · ${currentGrade}° ${currentSection}</div>
+        <div id="cal-edit-filas">${filas}</div>
+        <div style="display:flex;gap:10px;margin-top:24px">
+          <button id="btn-guardar-cal" onclick="guardarEdicionCalificacion()" style="flex:1;padding:13px;background:linear-gradient(135deg,#2D6A4F,#52B788);color:white;border:none;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer">💾 Guardar cambios</button>
+          <button onclick="document.getElementById('cal-edit-modal').remove()" style="padding:13px 20px;background:#F5F5F5;color:#555;border:none;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer">Cancelar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  }catch(e){
+    toast('⚠️ Error al cargar datos','#C62828');
+    console.warn('abrirEditarCalificacion error:',e);
+    btn.disabled=false; btn.textContent='✏️ Editar';
+  }
+}
+
+async function guardarEdicionCalificacion(){
+  const btnGuardar = document.getElementById('btn-guardar-cal');
+  if(btnGuardar){btnGuardar.disabled=true;btnGuardar.textContent='⏳ Guardando...';}
+  const selects = document.querySelectorAll('#cal-edit-filas select');
+  const {registros} = window._calEditData||{registros:[]};
+  try{
+    const promesas = [];
+    selects.forEach(sel=>{
+      const semana = sel.dataset.semana;
+      const fbKey = sel.dataset.fbkey;
+      const nuevaCal = sel.value;
+      if(fbKey && nuevaCal){
+        // Actualizar registro existente
+        promesas.push(
+          fetch(`${FB_URL}/calificaciones/${fbKey}.json`,{
+            method:'PATCH',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({calificacion:nuevaCal})
+          })
+        );
+      }
+      // Si no hay fbKey y hay calificación nueva, no hacemos nada (semana sin registro previo)
+    });
+    if(!promesas.length){
+      toast('⚠️ No hay cambios que guardar','#E65100');
+      if(btnGuardar){btnGuardar.disabled=false;btnGuardar.textContent='💾 Guardar cambios';}
+      return;
+    }
+    const results = await Promise.all(promesas);
+    const allOk = results.every(r=>r.ok);
+    const modal = document.getElementById('cal-edit-modal');
+    if(modal) modal.remove();
+    if(allOk){
+      toast('✅ Calificaciones actualizadas correctamente','#2D6A4F');
+    } else {
+      toast('⚠️ Algunos cambios no se guardaron, verifica la conexión','#E65100');
+    }
+    const panel = document.getElementById('calificaciones-panel');
+    panel.style.display='none';
+    setTimeout(()=>verCalificaciones(), 400);
+  }catch(e){
+    toast('⚠️ Error al guardar. Revisa la conexión.','#C62828');
+    console.warn('guardarEdicionCalificacion error:',e);
+    if(btnGuardar){btnGuardar.disabled=false;btnGuardar.textContent='💾 Guardar cambios';}
+  }
+}
+
+function exportarExcel(){
+  const tabla = document.getElementById('tabla-calificaciones');
+  if(!tabla){toast('⚠️ Primero abre la vista de calificaciones','#E65100');return;}
+  
+  // Build CSV content
+  const filas = [];
+  const encabezados = [...tabla.querySelectorAll('thead th')].map(th=>th.innerText.split('\n')[0].replace('👤 ',''));
+  filas.push(encabezados.join(','));
+  
+  tabla.querySelectorAll('tbody tr').forEach(tr=>{
+    const celdas = [...tr.querySelectorAll('td')].map(td=>td.innerText.trim().replace(/,/g,';'));
+    filas.push(celdas.join(','));
+  });
+  
+  // Add legend
+  filas.push('');
+  filas.push('Escala MINEDU');
+  filas.push('AD,Logro Destacado');
+  filas.push('A,Logro Esperado');
+  filas.push('B,En Proceso');
+  filas.push('C,En Inicio');
+
+  const csv = '\uFEFF' + filas.join('\n'); // BOM for Excel UTF-8
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Calificaciones_${currentGrade}°${currentSection}_${new Date().toLocaleDateString('es-PE').replace(/\//g,'-')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ Archivo Excel descargado correctamente','#2D6A4F');
+}
+
+
+async function guardarCalificacionFirebase(resp, calificacion, comentario){
+  try{
+    // Buscar en Firebase la respuesta y actualizarla
+    const res = await fetch(`${FB_URL}/respuestas.json`);
+    const data = await res.json();
+    if(!data) return;
+    // Encontrar el key de esta respuesta
+    const entries = Object.entries(data);
+    const entry = entries.find(([k,v])=>
+      v.nombre===resp.student &&
+      String(v.grado)===String(resp.grade) &&
+      v.seccion===resp.section &&
+      v.texto===resp.text
+    );
+    if(entry){
+      const [key] = entry;
+      await fetch(`${FB_URL}/respuestas/${key}.json`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          calificacion_minedu: calificacion,
+          comentario_docente: comentario,
+          fecha_calificacion: new Date().toLocaleDateString('es-PE')
+        })
+      });
+    }
+    // También guardar en tabla de calificaciones
+    await fetch(`${FB_URL}/calificaciones.json`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        nombre: resp.student,
+        grado: resp.grade,
+        seccion: resp.section,
+        texto: resp.text,
+        calificacion: calificacion,
+        comentario: comentario,
+        fecha: new Date().toLocaleDateString('es-PE'),
+        docente: currentGrade+'°'+currentSection
+      })
+    });
+  }catch(e){console.warn('Error guardando calificación:',e);}
+}
+
+function closeReviewModal(){document.getElementById('review-modal').classList.remove('open');}
+
+
+function uploadText(){
+  const type=document.getElementById('up-type').value,week=document.getElementById('up-week').value;
+  const title=document.getElementById('up-title').value.trim(),content=document.getElementById('up-content').value.trim();
+  // Collect questions WITH their level metadata (literal / inferencial / critico)
+  const qInputs=[...document.querySelectorAll('.q-input')];
+  const questions=qInputs.map(inp=>{
+    const text=inp.value.trim();
+    const level=inp.dataset.level||'';
+    return text?(level?{text,_level:level}:text):null;
+  }).filter(Boolean);
+  if(!title){toast('⚠️ Escribe el título','#E65100');return;}
+  if(!content){toast('⚠️ Escribe el contenido','#E65100');return;}
+  if(!questions.length){toast('⚠️ Agrega al menos una pregunta','#E65100');return;}
+  const key=getKey();if(!texts[key])texts[key]=[];
+  texts[key].push({id:Date.now(),type,title,content,questions,week,teacher:`Docente · ${currentGrade}° · ${currentSection}`});
+  saveTexts();
+  // Guardar texto en Firebase para acceso desde cualquier dispositivo
+  const fbKey=`${currentGrade}_${currentSection}`;
+  fetch(`${FB_URL}/textos/${fbKey}.json`,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(texts[getKey()])
+  }).catch(e=>console.warn('Firebase texto:',e));
+  const ex=adminOverview.find(r=>r.grade===currentGrade&&r.section===currentSection);
+  if(ex&&!ex.teacher)ex.teacher=`Docente · ${currentGrade}° · ${currentSection}`;
+  document.getElementById('up-title').value='';document.getElementById('up-content').value='';
+  document.querySelectorAll('.q-input').forEach(i=>i.value='');
+  document.getElementById('ai-gen-status').style.display='none';
+  renderTextList();toast('✅ Texto publicado exitosamente 🎉');
+}
+
+function addQuestion(){
+  const list=document.getElementById('questions-list'),n=list.children.length+1;
+  const row=document.createElement('div');row.className='question-row';row.style.animation='fadeUp .3s ease both';
+  row.innerHTML=`<input type="text" placeholder="Pregunta ${n}..." class="q-input"><button class="btn-icon btn-del" onclick="removeQuestion(this)">🗑</button>`;
+  list.appendChild(row);bindCursor();
+}
+function removeQuestion(btn){if(document.getElementById('questions-list').children.length<=1){toast('⚠️ Debe haber al menos una pregunta','#E65100');return;}btn.parentElement.remove();}
+
+// ══════════════════ DELETE/EDIT ══════════════════
+function openDelete(i){deleteIndex=i;document.getElementById('del-text-name').textContent='"'+getTexts()[i].title+'"';document.getElementById('del-modal').classList.add('open');}
+function closeModal(){document.getElementById('del-modal').classList.remove('open');}
+function confirmDelete(){texts[getKey()].splice(deleteIndex,1);saveTexts();closeModal();renderTextList();toast('🗑️ Texto eliminado');}
+function openEdit(i){editIndex=i;const t=getTexts()[i];document.getElementById('edit-title').value=t.title;document.getElementById('edit-content').value=t.content;document.getElementById('edit-modal').classList.add('open');}
+function closeEditModal(){document.getElementById('edit-modal').classList.remove('open');}
+function confirmEdit(){const key=getKey();texts[key][editIndex].title=document.getElementById('edit-title').value.trim()||texts[key][editIndex].title;texts[key][editIndex].content=document.getElementById('edit-content').value.trim()||texts[key][editIndex].content;saveTexts();closeEditModal();renderTextList();toast('✅ Texto actualizado');}
+
+// ══════════════════ PARENT ══════════════════
+let currentStudentName = '';
+
+function showParentScreen(studentName){
+  currentStudentName = studentName || 'Estudiante';
+  document.getElementById('parent-dash-name').textContent = currentStudentName;
+  document.getElementById('parent-dash-badge').innerHTML=`🎒 Grado ${currentGrade}° · Sección ${currentSection}`;
+  document.getElementById('parent-topbar-info').innerHTML=`<strong>${currentGrade}° · ${currentSection}</strong>`;
+  renderReadingContent('parent-content');
+}
+
+function getStreak(studentName, grade, section){
+  try{
+    const key=`lef_streak_${normalize(studentName)}_${grade}_${section}`;
+    const data=JSON.parse(localStorage.getItem(key)||'{"count":0,"lastWeek":""}');
+    return data;
+  }catch(e){return{count:0,lastWeek:''};}
+}
+function updateStreak(studentName, grade, section, week){
+  try{
+    const key=`lef_streak_${normalize(studentName)}_${grade}_${section}`;
+    const data=getStreak(studentName,grade,section);
+    if(data.lastWeek===week)return data.count; // ya contó esta semana
+    data.count=data.count+1;
+    data.lastWeek=week;
+    localStorage.setItem(key,JSON.stringify(data));
+    return data.count;
+  }catch(e){return 1;}
+}
+
+function renderReadingContent(cid){
+  const container=document.getElementById(cid),arr=texts[`${currentGrade}-${currentSection}`]||[];
+  if(!arr.length){container.innerHTML=`<div class="empty-state" style="padding:60px 20px"><span class="empty-icon">📭</span><p>El/la docente aún no ha subido el texto de esta semana.<br>¡Regresa pronto!</p></div>`;return;}
+  const t=arr[arr.length-1];
+  const te={cuento:'📖',leyenda:'🌿',texto:'📄',fabula:'🦊',poema:'🌸'};
+  const tl={cuento:'Cuento',leyenda:'Leyenda',texto:'Texto informativo',fabula:'Fábula',poema:'Poema'};
+  const paras=t.content.split('\n').filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+
+  // Racha
+  const streak=getStreak(currentStudentName,currentGrade,currentSection);
+  const streakHTML=streak.count>0?`
+    <div class="streak-banner">
+      <span class="streak-fire">🔥</span>
+      <div>
+        <div class="streak-num">SEMANA ${streak.count}</div>
+        <div class="streak-label">¡${currentStudentName} lleva ${streak.count} semana${streak.count!==1?'s':' '} leyendo seguido! ${streak.count>=4?'🏆 ¡Increíble!':streak.count>=2?'⭐ ¡Sigue así!':'💪 ¡Buen inicio!'}</div>
+      </div>
+    </div>`:'';
+
+  const qForms=t.questions.map((q,i)=>{
+    const level=q._level||'';
+    const levelBadge=level==='literal'?`<span class="q-level-badge level-literal">Literal</span>`:
+                     level==='inferencial'?`<span class="q-level-badge level-inferencial">Inferencial</span>`:
+                     level==='critico'?`<span class="q-level-badge level-critico">Crítico</span>`:'';
+    const qText=q.text||q;
+    return`<div class="question-item" style="animation:fadeUp .4s ${i*.1}s ease both" id="qitem-${i}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <p style="margin:0;flex:1">${i+1}. ${qText}</p>${levelBadge}
+      </div>
+      <textarea placeholder="Escribe aquí tu respuesta..." id="ans-text-${i}"></textarea>
+      <div class="audio-recorder" id="rec-${i}" style="margin-top:8px">
+        <button class="btn-rec" id="btn-rec-${i}" onclick="toggleRecording(${i},this)">
+          🎙️ Grabar respuesta en audio
+        </button>
+        <div class="rec-status" id="rec-status-${i}" style="display:none;align-items:center;gap:10px;margin-top:6px">
+          <span class="rec-dot"></span>
+          <span id="rec-time-${i}" style="font-size:.82rem;font-weight:700;color:#C62828">0:00</span>
+          <button class="btn-rec-stop" onclick="stopRecording(${i})">⏹ Detener</button>
+        </div>
+        <div id="audio-preview-${i}" style="display:none;margin-top:8px"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML=`
+    ${streakHTML}
+    <div class="info-banner" style="animation:fadeUp .4s ease both">
+      <span>📅</span>
+      <span>Semana <strong>${t.week||'actual'}</strong> · ${tl[t.type]||'Texto'} · Grado ${currentGrade}° · Sección ${currentSection}</span>
+    </div>
+
+    <!-- TEXTO PARA LEER -->
+    <div class="text-reader" style="animation:fadeUp .5s .1s ease both">
+      <div class="text-type">${te[t.type]||'📄'} ${tl[t.type]||'Texto'}</div>
+      <div class="text-title">${t.title}</div>
+      ${paras}
+
+      <!-- 🎙️ BOTÓN LEER EN VOZ ALTA -->
+      <div style="margin-top:22px;padding:16px;background:linear-gradient(135deg,rgba(33,150,168,.08),rgba(72,202,228,.04));border:1.5px solid rgba(33,150,168,.25);border-radius:16px;">
+        <div style="font-size:.82rem;font-weight:800;color:var(--sky);margin-bottom:10px;">
+          🎙️ Lee el texto en voz alta — la maestra evaluará tu lectura oral
+        </div>
+        <button class="btn-rec" id="btn-rec-reading" onclick="toggleRecording('reading',this)" style="background:linear-gradient(135deg,#1565C0,#42A5F5);width:100%;justify-content:center;font-size:.9rem;padding:12px">
+          🎙️ Grabar mi lectura del texto
+        </button>
+        <div class="rec-status" id="rec-status-reading" style="display:none;align-items:center;gap:10px;margin-top:8px">
+          <span class="rec-dot"></span>
+          <span id="rec-time-reading" style="font-size:.85rem;font-weight:700;color:#C62828">0:00</span>
+          <button class="btn-rec-stop" onclick="stopRecording('reading')">⏹ Detener</button>
+        </div>
+        <div id="audio-preview-reading" style="display:none;margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- PREGUNTAS -->
+    <div class="questions-box" style="animation:fadeUp .5s .2s ease both">
+      <div class="section-title" style="margin-bottom:4px;color:#C62828">Preguntas de comprensión</div>
+      <p style="font-size:.8rem;color:var(--text-light);margin-bottom:16px">Puedes escribir tu respuesta ✍️, grabar tu voz 🎙️, o las dos.</p>
+      ${qForms}
+      <div style="margin-top:22px">
+        <button class="btn-primary btn-amber" onclick="submitAnswers()" id="btn-submit-answers" style="width:auto;padding:14px 38px;">
+          📤 Enviar respuestas
+        </button>
+      </div>
+    </div>`;
+}
+// ══════════════════ FIREBASE REALTIME DATABASE ══════════════════
+const FB_URL = 'https://lectura-en-familia---2026-default-rtdb.firebaseio.com';
+
+async function guardarEnFirebase(datos){
+  try{
+    const res = await fetch(`${FB_URL}/respuestas.json`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(datos)
+    });
+    if(!res.ok) throw new Error('Error Firebase');
+  } catch(e){
+    console.warn('Firebase error:',e);
+  }
+}
+
+async function guardarEstudianteFirebase(estudiante){
+  try{
+    const key = `${estudiante.grade}_${estudiante.section}_${estudiante.name.replace(/\s+/g,'_')}`;
+    await fetch(`${FB_URL}/estudiantes/${key}.json`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(estudiante)
+    });
+  } catch(e){ console.warn('Firebase estudiante error:',e); }
+}
+
+async function guardarTextoFirebase(grade, section, texto){
+  try{
+    const key = `${grade}_${section}`;
+    await fetch(`${FB_URL}/textos/${key}/${texto.id}.json`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(texto)
+    });
+  } catch(e){ console.warn('Firebase texto error:',e); }
+}
+
+// ── Convierte un Blob a Base64 ──
+function blobToBase64(blob){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onloadend=()=>resolve(reader.result);
+    reader.onerror=reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function submitAnswers(){
+  if(!currentStudentName||currentStudentName==='Estudiante'){
+    toast('⚠️ Por favor ingresa el nombre del estudiante antes de enviar','#E65100');
+    return;
+  }
+  const arr=texts[`${currentGrade}-${currentSection}`]||[];
+  if(!arr.length)return;
+  const t=arr[arr.length-1];
+  const answerEls=t.questions.map((_,i)=>document.getElementById(`ans-text-${i}`));
+  const answers=answerEls.map(el=>el?el.value.trim():'');
+
+  // Detectar audios grabados
+  const audioIdxs=t.questions.map((_,i)=>i);
+  const hasAnyAudio=audioIdxs.some(i=>audioBlobs[i])||audioBlobs['reading'];
+  const hasContent=answers.some(a=>a.length>0)||hasAnyAudio;
+
+  if(!hasContent){toast('⚠️ Escribe o graba una respuesta antes de enviar','#E65100');return;}
+
+  // Deshabilitar botón mientras procesa
+  const btnSubmit=document.getElementById('btn-submit-answers');
+  if(btnSubmit){btnSubmit.disabled=true;btnSubmit.textContent='⏳ Enviando...';}
+
+  // Verificar si ya envió esta tarea
+  await cargarRespuestasFirebase();
+  const yaEnvio=familyResponses.some(r=>
+    r.student.toLowerCase()===currentStudentName.toLowerCase()&&
+    String(r.grade)===String(currentGrade)&&
+    r.section===currentSection&&
+    r.text===t.title
+  );
+  if(yaEnvio){
+    toast('⚠️ '+currentStudentName+' ya envió esta tarea anteriormente','#E65100');
+    if(btnSubmit){btnSubmit.disabled=true;btnSubmit.textContent='✅ Ya enviado';}
+    return;
+  }
+
+  // Subir audios a Firebase Storage
+  const audioUrls={};
+  const timestamp = Date.now();
+  const studentSlug = currentStudentName.replace(/\s+/g,'_').toLowerCase();
+  const baseAudioPath = `${currentGrade}_${currentSection}/${studentSlug}_${timestamp}`;
+
+  if(btnSubmit){btnSubmit.textContent='⏳ Subiendo audios...';}
+
+  for(const i of audioIdxs){
+    if(audioBlobs[i]){
+      const url = await subirAudioStorage(audioBlobs[i], `${baseAudioPath}_resp${i+1}`);
+      if(url) audioUrls[`audio_resp_${i+1}`] = url;
+    }
+  }
+  if(audioBlobs['reading']){
+    const url = await subirAudioStorage(audioBlobs['reading'], `${baseAudioPath}_lectura`);
+    if(url) audioUrls['audio_lectura'] = url;
+  }
+
+  const tieneAudios = Object.keys(audioUrls).length > 0;
+  if(btnSubmit){btnSubmit.textContent='⏳ Guardando...';}
+
+  // Guardar en Firebase con URLs de audios
+  await guardarEnFirebase({
+    nombre: currentStudentName,
+    grado: currentGrade,
+    seccion: currentSection,
+    texto: t.title,
+    textId: t.id,
+    semana: t.week||'',
+    fecha: new Date().toLocaleDateString('es-PE'),
+    respuesta1: answers[0]||'',
+    respuesta2: answers[1]||'',
+    respuesta3: answers[2]||'',
+    respuesta4: answers[3]||'',
+    respuesta5: answers[4]||'',
+    tiene_audios: tieneAudios,
+    ...audioUrls
+  });
+
+  // Actualizar racha
+  const newStreak=updateStreak(currentStudentName,currentGrade,currentSection,t.week||'');
+  audioBlobs={};
+  if(btnSubmit){btnSubmit.disabled=true;btnSubmit.textContent='✅ Enviado';}
+  showCelebration(currentStudentName, newStreak);
+  const msg=tieneAudios?'✅ ¡Respuestas y audios enviados! La maestra los revisará 🎙️📖':'✅ ¡Respuestas enviadas! Gracias por leer en familia 📖';
+  toast(msg);
+}
+
+// ══════════════════ ADMIN ══════════════════
+function showAdminScreen(){
+  cargarRespuestasFirebase().then(()=>{
+    renderAdminStats();
+    renderChartByClassroom();
+    renderChartByGrade();
+    renderAdminTabs();
+    renderAdminTable('all');
+    renderPasswordTable();
+    renderStudentsList();
+  });
+}
+
+function renderAdminStats(){
+  const total=adminOverview.length;
+  // Real text counts
+  const allRealCounts=adminOverview.map(r=>getRealTextCount(r.grade,r.section));
+  const complete=allRealCounts.filter(n=>n>=MONTHLY_GOAL).length;
+  const totalTexts=allRealCounts.reduce((s,n)=>s+n,0);
+  const totalResp=familyResponses.length;
+  document.getElementById('admin-stats').innerHTML=`
+    <div class="stat-card" style="animation:fadeUp .4s .00s ease both"><div class="stat-number">${total}</div><div class="stat-label">Total aulas</div></div>
+    <div class="stat-card" style="animation:fadeUp .4s .07s ease both"><div class="stat-number" style="color:var(--forest)">${complete}</div><div class="stat-label">Meta cumplida (4 textos)</div></div>
+    <div class="stat-card" style="animation:fadeUp .4s .14s ease both"><div class="stat-number" style="color:var(--amber-dark)">${totalTexts}</div><div class="stat-label">Textos subidos</div></div>
+    <div class="stat-card" style="animation:fadeUp .4s .21s ease both"><div class="stat-number" style="color:var(--sky)">${totalResp}</div><div class="stat-label">Respuestas familias</div></div>`;
+}
+
+function getRealTextCount(grade, section){
+  // Count texts actually uploaded in the texts{} object (source of truth)
+  return (texts[`${grade}-${section}`]||[]).length;
+}
+
+function renderChartByClassroom(){
+  const sorted=[...adminOverview].sort((a,b)=>
+    a.grade!==b.grade?a.grade.localeCompare(b.grade):a.section.localeCompare(b.section));
+
+  function textDonut(n,size=90){
+    const cx=size/2,cy=size/2,r=(size/2)-10,sw=10;
+    const circ=2*Math.PI*r;
+    const pct=Math.min(n/MONTHLY_GOAL,1);
+    const dash=pct*circ;
+    const col=n===0?'#BDBDBD':n===1?'#EF5350':n===2?'#FF7043':n===3?'#FFD54F':'#52B788';
+    const bg=n===0?'#F5F5F5':n>=MONTHLY_GOAL?'#E8F5E9':'#FFFDE7';
+    const tCol=n===0?'#BDBDBD':n>=MONTHLY_GOAL?'#2D6A4F':n===1?'#C62828':n===2?'#E65100':'#B8860B';
+    return`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="${bg}"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E8E2D8" stroke-width="${sw}"/>
+      ${n>0?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${sw}"
+        stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"
+        transform="rotate(-90 ${cx} ${cy})"/>`:''}
+      <text x="${cx}" y="${cy+1}" text-anchor="middle" dominant-baseline="middle"
+        font-size="${size*.26}" font-weight="900" fill="${tCol}" font-family="Arial,sans-serif">${n}</text>
+      <text x="${cx}" y="${cy+size*.19}" text-anchor="middle"
+        font-size="${size*.11}" fill="#AAA" font-family="Arial,sans-serif">de ${MONTHLY_GOAL}</text>
+    </svg>`;
+  }
+
+  document.getElementById('chart-by-classroom').innerHTML=`
+    <div class="chart-box">
+      <div class="chart-box-title">📚 Textos subidos por aula — este mes</div>
+      <div class="chart-sub">Meta mensual: <strong>${MONTHLY_GOAL} textos</strong> (1 por semana). Cada círculo = un aula.</div>
+      <div class="donut-aulas-grid">
+        ${sorted.map(r=>{
+          const n=getRealTextCount(r.grade,r.section);
+          const lbl=n>=MONTHLY_GOAL?'✅ Meta':n===0?'Sin textos':'⏳ '+n+'/'+MONTHLY_GOAL;
+          const lblCol=n>=MONTHLY_GOAL?'#2D6A4F':n===0?'#9E9E9E':'#E65100';
+          return`<div class="donut-aula-card">
+            ${textDonut(n,90)}
+            <div class="donut-aula-label">${r.grade}°<strong>${r.section}</strong></div>
+            <div class="donut-aula-teacher">${r.teacher}</div>
+            <div class="donut-aula-sub" style="color:${lblCol};font-size:.7rem;font-weight:700">${lbl}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="legend-row" style="margin-top:18px">
+        <div class="legend-item"><div class="legend-dot" style="background:#BDBDBD"></div>Sin textos aún</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#EF5350"></div>1 texto</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#FF7043"></div>2 textos</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#FFD54F"></div>3 textos</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#52B788"></div>4 textos ✅ Meta</div>
+      </div>
+    </div>`;
+}
+
+function renderChartByGrade(){
+  const grades=['1','2','3','4','5','6'];
+
+  // 3-segment donut: verde=leyendo, amarillo=sin respuesta, rojo=sin texto
+  // Uses stroke-dashoffset trick: each segment is offset by cumulative previous
+  function gradeDonut(reading, notReading, neverIn, size=120){
+    const cx=size/2,cy=size/2,r=(size/2)-12,sw=13;
+    const circ=2*Math.PI*r;
+    const total=Math.max(reading+notReading+neverIn,1);
+    const dR=(reading/total)*circ;
+    const dN=(notReading/total)*circ;
+    const dX=(neverIn/total)*circ;
+    // offset: rotate start -90deg, then each segment offset by cumulative arc
+    const offR=0;
+    const offN=-(dR);
+    const offX=-(dR+dN);
+    const readPct=Math.round((reading/total)*100);
+    const noRespPct=Math.round((notReading/total)*100);
+    const neverPct=Math.round((neverIn/total)*100);
+    return`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#F8F5F0"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E8E2D8" stroke-width="${sw}"/>
+      ${reading>0?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#52B788" stroke-width="${sw}"
+        stroke-dasharray="${dR.toFixed(1)} ${(circ-dR).toFixed(1)}"
+        stroke-dashoffset="${offR}" transform="rotate(-90 ${cx} ${cy})"/>`:''}
+      ${notReading>0?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#FFD54F" stroke-width="${sw}"
+        stroke-dasharray="${dN.toFixed(1)} ${(circ-dN).toFixed(1)}"
+        stroke-dashoffset="${offN.toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`:''}
+      ${neverIn>0?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#EF5350" stroke-width="${sw}"
+        stroke-dasharray="${dX.toFixed(1)} ${(circ-dX).toFixed(1)}"
+        stroke-dashoffset="${offX.toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`:''}
+      <text x="${cx}" y="${cy-4}" text-anchor="middle" dominant-baseline="middle"
+        font-size="${size*.2}" font-weight="900" fill="#2D6A4F" font-family="Arial,sans-serif">${readPct}%</text>
+      <text x="${cx}" y="${cy+size*.13}" text-anchor="middle"
+        font-size="${size*.095}" fill="#8A7060" font-family="Arial,sans-serif">leyendo</text>
+    </svg>`;
+  }
+
+  const rows=grades.map(g=>{
+    const aulas=adminOverview.filter(r=>r.grade===g);
+    const total=aulas.length;
+    // secciones sin texto subido = "nunca ingresan"
+    const neverIn=aulas.filter(r=>getRealTextCount(r.grade,r.section)===0).length;
+    // secciones con texto subido
+    const withText=aulas.filter(r=>getRealTextCount(r.grade,r.section)>0);
+    // de las que tienen texto: cuántas tienen al menos una respuesta enviada
+    const sectionsWithResp=new Set(familyResponses.filter(r=>r.grade===g).map(r=>r.section));
+    const reading=withText.filter(r=>sectionsWithResp.has(r.section)).length;
+    const notReading=withText.filter(r=>!sectionsWithResp.has(r.section)).length;
+    const readPct=total?Math.round((reading/total)*100):0;
+    const noRespPct=total?Math.round((notReading/total)*100):0;
+    const neverPct=total?Math.round((neverIn/total)*100):0;
+    return{g,total,reading,notReading,neverIn,readPct,noRespPct,neverPct};
+  });
+
+  document.getElementById('chart-by-grade').innerHTML=`
+    <div class="chart-box">
+      <div class="chart-box-title">📈 Participación por Grado</div>
+      <div class="chart-sub">¿Cuántas secciones de cada grado están leyendo este mes?</div>
+      <div class="grade-donut-grid">
+        ${rows.map(r=>`
+          <div class="grade-donut-card">
+            ${gradeDonut(r.reading,r.notReading,r.neverIn,120)}
+            <div class="grade-donut-lbl">Grado ${r.g}°</div>
+            <div class="grade-donut-stats">
+              <div><span class="dot-green">●</span> ${r.reading}/${r.total} leyendo (${r.readPct}%)</div>
+              <div><span class="dot-yellow">●</span> ${r.notReading}/${r.total} sin respuestas (${r.noRespPct}%)</div>
+              <div><span class="dot-red">●</span> ${r.neverIn}/${r.total} sin texto (${r.neverPct}%)</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="legend-row" style="margin-top:18px">
+        <div class="legend-item"><div class="legend-dot" style="background:#52B788"></div>Secciones con respuestas enviadas ✅</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#FFD54F"></div>Texto subido pero sin respuestas aún</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#EF5350"></div>Docente no ha subido texto</div>
+      </div>
+    </div>`;
+}
+
+function animateBars(){
+  document.querySelectorAll('[data-target]').forEach(el=>{el.style.width=el.dataset.target+'%';});
+}
+
+function renderAdminTabs(){
+  document.getElementById('admin-tabs').innerHTML=`
+    <button class="tab-btn active" onclick="renderAdminTable('all');setTab(this)">Todos</button>
+    ${['1','2','3','4','5','6'].map(g=>`<button class="tab-btn" onclick="renderAdminTable('${g}');setTab(this)">${g}°</button>`).join('')}
+    <button class="tab-btn" onclick="renderAdminTable('missing');setTab(this)" style="color:var(--rust)">⚠️ Sin meta</button>`;
+  setTimeout(bindCursor,50);
+}
+function setTab(btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function renderAdminTable(f){
+  let rows=[...adminOverview].sort((a,b)=>a.grade!==b.grade?a.grade.localeCompare(b.grade):a.section.localeCompare(b.section));
+  if(f!=='all'&&f!=='missing')rows=rows.filter(r=>r.grade===f);
+  const rowsWithReal=rows.map(r=>({...r,realCount:getRealTextCount(r.grade,r.section)}));
+  if(f==='missing'){
+    rows=rowsWithReal.filter(r=>r.realCount<MONTHLY_GOAL);
+  } else {
+    rows=rowsWithReal;
+  }
+  if(f!=='all'&&f!=='missing'){rows=rowsWithReal.filter(r=>r.grade===f);}
+  document.getElementById('admin-table-body').innerHTML=rows.map(r=>{
+    const n=r.realCount;
+    const lastW=(texts[`${r.grade}-${r.section}`]||[]).slice(-1)[0]?.week||'—';
+    return`<tr>
+      <td><strong>${r.grade}°</strong></td>
+      <td>${r.section}</td>
+      <td>${r.teacher}</td>
+      <td><strong>${n}</strong> / ${MONTHLY_GOAL}</td>
+      <td>${lastW}</td>
+      <td><span class="status-pill ${n>=MONTHLY_GOAL?'status-ok':'status-miss'}">${n>=MONTHLY_GOAL?'✅ Meta lograda':n===0?'Sin textos':'⚠️ En progreso'}</span></td>
+    </tr>`;}).join('')||'<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-light)">Sin datos</td></tr>';
+}
+
+function renderPasswordTable(){
+  let rows='';
+  Object.entries(GRADE_SECTIONS).forEach(([g,secs])=>{
+    secs.forEach(s=>{
+      const key=`${g}-${s}`;
+      const pw=TEACHER_PASSWORDS[key];
+      if(!pw)return;
+      const doc=adminOverview.find(r=>r.grade===g&&r.section===s);
+      rows+=`<tr><td><strong>${g}°</strong></td><td>${s}</td><td><span class="pass-code">${pw}</span></td><td>${doc?doc.teacher:'—'}</td></tr>`;
+    });
+  });
+  document.getElementById('pass-table-body').innerHTML=rows;
+}
+
+function renderFamilyResponses(){
+  const c=document.getElementById('admin-responses');
+  if(!familyResponses.length){
+    c.innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><p>Aún no hay respuestas de familias registradas.</p></div>`;
+    return;
+  }
+  // Group responses by grade+section
+  const groups={};
+  familyResponses.forEach(r=>{
+    const key=`${r.grade}-${r.section}`;
+    if(!groups[key])groups[key]=[];
+    groups[key].push(r);
+  });
+  // Sort groups by grade then section
+  const sortedKeys=Object.keys(groups).sort((a,b)=>{
+    const [ag,as]=a.split('-'),{bg,bs}=(() => {const [x,y]=b.split('-');return{bg:x,bs:y};})();
+    return ag!==bg?ag.localeCompare(bg):as.localeCompare(bs);
+  });
+  c.innerHTML=sortedKeys.map((key,idx)=>{
+    const [g,s]=key.split('-');
+    const arr=groups[key];
+    const cards=arr.map((r,i)=>`
+      <div class="reading-card" style="margin-bottom:10px;animation:fadeUp .3s ${i*.06}s ease both">
+        <div class="reading-type-badge badge-cuento">📝</div>
+        <div class="reading-body">
+          <div class="reading-title">${r.family}</div>
+          <div class="reading-meta">
+            <span>🎒 ${r.student}</span>
+            <span>📖 ${r.text}</span>
+          </div>
+          <div style="font-size:.82rem;color:var(--text-light);line-height:1.85;margin-top:6px">
+            ${r.answers.map((a,i)=>`<div><strong>R${i+1}:</strong> ${a}</div>`).join('')}
+          </div>
+        </div>
+      </div>`).join('');
+    return`
+      <div class="resp-group" style="margin-bottom:12px;animation:fadeUp .4s ${idx*.06}s ease both">
+        <button class="resp-group-btn" onclick="toggleRespGroup('rg-${key}',this)">
+          <span class="resp-group-label">🎒 ${g}° · Sección ${s}</span>
+          <span class="resp-group-count">${arr.length} respuesta${arr.length!==1?'s':''}</span>
+          <span class="resp-chevron">▼</span>
+        </button>
+        <div class="resp-group-content" id="rg-${key}" style="display:none;padding:14px 4px 4px">
+          ${cards}
+        </div>
+      </div>`;
+  }).join('');
+  bindCursor();
+}
+
+function toggleRespGroup(id,btn){
+  const el=document.getElementById(id);
+  const open=el.style.display==='block';
+  el.style.display=open?'none':'block';
+  btn.querySelector('.resp-chevron').style.transform=open?'rotate(0deg)':'rotate(180deg)';
+  btn.classList.toggle('active',!open);
+}
+
+// ══════════════════ PDF REPORT ══════════════════
+function generatePDF(){
+  const now=new Date();
+  const monthName=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][now.getMonth()];
+  const year=now.getFullYear();
+
+  // ── Use REAL text counts (from texts{} object, not demo data) ──
+  const realData=adminOverview.map(r=>({
+    ...r,
+    realCount:getRealTextCount(r.grade,r.section),
+    textList:texts[`${r.grade}-${r.section}`]||[]
+  })).sort((a,b)=>a.grade!==b.grade?a.grade.localeCompare(b.grade):a.section.localeCompare(b.section));
+
+  const activeAulas=realData.filter(r=>r.realCount>0);
+  const totalAulas=realData.length;
+  const totalTexts=realData.reduce((s,r)=>s+r.realCount,0);
+  const totalComplete=realData.filter(r=>r.realCount>=MONTHLY_GOAL).length;
+
+  const gradeStats=['1','2','3','4','5','6'].map(g=>{
+    const aulas=realData.filter(r=>r.grade===g);
+    const uploaded=aulas.filter(r=>r.realCount>0);
+    const total=uploaded.reduce((s,r)=>s+r.realCount,0);
+    const avg=uploaded.length?(total/uploaded.length).toFixed(1):'0.0';
+    const complete=aulas.filter(r=>r.realCount>=MONTHLY_GOAL).length;
+    return{g,aulas:aulas.length,uploaded:uploaded.length,complete,avg};
+  });
+
+  function donutSVG(n,goal,color,size=96){
+    const cx=size/2,cy=size/2,r=(size/2)-10,stroke=10;
+    const circ=2*Math.PI*r;
+    const filled=Math.min(n/goal,1);
+    const dash=filled*circ;
+    const pct=Math.round(filled*100);
+    const bgColor=n>=goal?'#E8F5E9':n===0?'#F5F5F5':'#FFF8E1';
+    const textBig=n>=goal?'#2D6A4F':n===0?'#9E9E9E':n<2?'#C62828':'#E65100';
+    return`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="${bgColor}" stroke="none"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E0E0E0" stroke-width="${stroke}"/>
+      ${n>0?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}"
+        stroke-dasharray="${dash.toFixed(2)} ${circ.toFixed(2)}"
+        stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>`:''}
+      <text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="${size*0.22}" font-weight="900" fill="${textBig}" font-family="Arial,sans-serif">${n}</text>
+      <text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="${size*0.1}" fill="#888" font-family="Arial,sans-serif">de ${goal}</text>
+      <text x="${cx}" y="${cy+22}" text-anchor="middle" font-size="${size*0.1}" font-weight="700" fill="${n>0?color:'#BDBDBD'}" font-family="Arial,sans-serif">${pct}%</text>
+    </svg>`;
+  }
+  function donutColor(n){if(n>=4)return'#2D6A4F';if(n===3)return'#52B788';if(n===2)return'#E65100';if(n===1)return'#EF5350';return'#BDBDBD';}
+
+  function gradeBars(gs){
+    const goal=4;
+    return gs.map(g=>{
+      const avg=parseFloat(g.avg)||0;
+      const pct=Math.min(avg/goal,1);
+      const fill=avg>=4?'#2D6A4F':avg>=3?'#52B788':avg>=2?'#E65100':avg>=1?'#EF5350':'#BDBDBD';
+      return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+        <span style="font-size:11px;font-weight:800;color:#4A3520;width:60px;text-align:right">Grado ${g.g}°</span>
+        <div style="flex:1;height:28px;background:#F0EDE8;border-radius:50px;overflow:hidden;position:relative;">
+          ${avg>0
+            ?`<div style="width:${Math.round(pct*100)}%;height:100%;background:${fill};border-radius:50px;display:flex;align-items:center;padding-left:10px;min-width:40px">
+                <span style="font-size:10px;font-weight:800;color:white;white-space:nowrap;">${g.avg} prom · ${g.complete}/${g.aulas} ✅</span>
+              </div>`
+            :`<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:10px;color:#AAA;font-style:italic;">Sin textos subidos aún</span>`}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── no longer use fake textsMonth from adminOverview ──
+  const pct=totalAulas?Math.round(totalComplete/totalAulas*100):0;
+
+  const html=`<!DOCTYPE html><html><head>
+  <meta charset="UTF-8">
+  <title>Informe Mensual — Lectura en Familia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Nunito',Arial,sans-serif;background:white;color:#1A1008;font-size:11.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    @page{margin:14mm 14mm;size:A4;}
+    @media print{body{zoom:0.95;}}
+    .pdf-header{background:linear-gradient(135deg,#3A0D3F,#6B3A6F,#9B5AAF);color:white;padding:20px 26px 18px;border-radius:12px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-end;}
+    .pdf-header h1{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;margin-bottom:3px;}
+    .pdf-header p{font-size:10px;opacity:.82;}
+    .month-box{text-align:right;}
+    .month{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
+    .year{font-size:11px;opacity:.8;}
+    .kpi-row{display:flex;gap:10px;margin-bottom:18px;}
+    .kpi{flex:1;background:#F8F5F0;border-radius:10px;padding:12px 8px;text-align:center;border:1.5px solid #EAE5DC;}
+    .kpi-n{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:#6B3A6F;line-height:1;}
+    .kpi-l{font-size:8.5px;color:#8A7060;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
+    .sec-h{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#1A1008;margin:16px 0 10px;padding-bottom:4px;border-bottom:2.5px solid #6B3A6F;display:flex;align-items:center;gap:6px;}
+    .donut-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+    .donut-item{width:98px;background:#FEFCF7;border-radius:12px;padding:8px 6px 7px;text-align:center;border:1.5px solid #EAE5DC;page-break-inside:avoid;}
+    .donut-lbl{font-size:11px;font-weight:800;color:#2D6A4F;margin-top:3px;}
+    .status-ok{color:#2D6A4F;font-weight:800;font-size:8.5px;}
+    .status-prog{color:#E65100;font-weight:700;font-size:8.5px;}
+    .grade-bars{margin-bottom:16px;}
+    .stbl{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:16px;}
+    .stbl th{background:linear-gradient(135deg,#6B3A6F,#9B6AAF);color:white;padding:7px 9px;text-align:left;font-weight:700;font-size:8.5px;text-transform:uppercase;letter-spacing:.05em;}
+    .stbl td{padding:7px 9px;border-bottom:1px solid #EEE;color:#4A3520;vertical-align:middle;}
+    .stbl tr:last-child td{border-bottom:none;}
+    .stbl tr:nth-child(even) td{background:#FAF7F3;}
+    .pill{display:inline-block;padding:2px 8px;border-radius:50px;font-size:8.5px;font-weight:800;text-transform:uppercase;white-space:nowrap;}
+    .pill-ok{background:#E8F5E9;color:#2E7D32;}
+    .pill-warn{background:#FFF8E1;color:#F57F17;}
+    .pill-none{background:#F5F5F5;color:#9E9E9E;}
+    .note-box{background:#FFF8E1;border:1.5px solid #FFE082;border-radius:8px;padding:10px 14px;font-size:9.5px;color:#795548;margin-bottom:16px;}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:9px;color:#8A7060;}
+    .ld{display:flex;align-items:center;gap:4px;}
+    .ldot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .pdf-footer{margin-top:20px;padding-top:10px;border-top:1.5px solid #EEE;font-size:8.5px;color:#AAA;display:flex;justify-content:space-between;align-items:center;}
+    .pdf-footer .logo{font-family:'Playfair Display',serif;font-size:11px;color:#6B3A6F;font-weight:700;}
+  </style></head><body>
+
+  <div class="pdf-header">
+    <div>
+      <h1>📖 Informe Mensual — Lectura en Familia</h1>
+      <p>Nivel Primaria · de 1° a 6° grado · Dirección Académica</p>
+    </div>
+    <div class="month-box">
+      <div class="month">${monthName}</div>
+      <div class="year">${year}</div>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-n">${totalAulas}</div><div class="kpi-l">Total aulas</div></div>
+    <div class="kpi"><div class="kpi-n" style="color:#2D6A4F">${activeAulas.length}</div><div class="kpi-l">Aulas con textos</div></div>
+    <div class="kpi"><div class="kpi-n" style="color:#C4821A">${totalTexts}</div><div class="kpi-l">Textos subidos</div></div>
+    <div class="kpi"><div class="kpi-n" style="color:#6B3A6F">${totalComplete}</div><div class="kpi-l">Aulas con meta ✅</div></div>
+  </div>
+
+  ${activeAulas.length===0?`<div class="note-box">⚠️ Aún no se han subido textos en ningún aula este mes. Los gráficos y tablas se actualizarán automáticamente cuando los docentes publiquen textos.</div>`:''}
+
+  ${activeAulas.length>0?`
+  <div class="sec-h">📊 Aulas con textos publicados</div>
+  <div class="donut-grid">
+    ${activeAulas.map(r=>{
+      const st=r.realCount>=4?`<span class="status-ok">✅ Meta lograda</span>`:`<span class="status-prog">En progreso</span>`;
+      const lastW=r.textList.length?r.textList[r.textList.length-1].week:'—';
+      return`<div class="donut-item">
+        ${donutSVG(r.realCount,MONTHLY_GOAL,donutColor(r.realCount),96)}
+        <div class="donut-lbl">${r.grade}° · ${r.section}</div>
+        <div style="font-size:8px;color:#8A7060;margin-top:1px">Sem. ${lastW}</div>
+        <div style="margin-top:2px">${st}</div>
+      </div>`;
+    }).join('')}
+  </div>
+  <div class="legend">
+    <div class="ld"><div class="ldot" style="background:#EF5350"></div>1 texto</div>
+    <div class="ld"><div class="ldot" style="background:#E65100"></div>2 textos</div>
+    <div class="ld"><div class="ldot" style="background:#52B788"></div>3 textos</div>
+    <div class="ld"><div class="ldot" style="background:#2D6A4F"></div>4 textos ✅ Meta</div>
+  </div>`:''}
+
+  <div class="sec-h">📈 Avance por Grado</div>
+  <div class="grade-bars">${gradeBars(gradeStats)}</div>
+  <div class="legend" style="margin-top:4px;margin-bottom:12px">
+    <div class="ld"><div class="ldot" style="background:#F0EDE8;border:1px solid #DDD"></div>Sin avance aún</div>
+    <div class="ld"><div class="ldot" style="background:#EF5350"></div>1 promedio</div>
+    <div class="ld"><div class="ldot" style="background:#E65100"></div>2 promedio</div>
+    <div class="ld"><div class="ldot" style="background:#52B788"></div>3 promedio</div>
+    <div class="ld"><div class="ldot" style="background:#2D6A4F"></div>4 ✅ Meta</div>
+  </div>
+
+  <div class="sec-h">📋 Estado completo por Aula</div>
+  <table class="stbl">
+    <thead><tr><th>Grado</th><th>Sección</th><th>Textos subidos</th><th>Última semana</th><th>Estado</th></tr></thead>
+    <tbody>
+      ${realData.map(r=>{
+        const n=r.realCount;
+        const cls=n>=4?'pill-ok':n===0?'pill-none':'pill-warn';
+        const lbl=n>=4?'✅ Meta lograda':n===0?'Sin textos aún':'🔄 En progreso';
+        const lastW=r.textList.length?r.textList[r.textList.length-1].week:'—';
+        return`<tr><td><strong>${r.grade}°</strong></td><td>${r.section}</td><td><strong>${n}</strong> / ${MONTHLY_GOAL}</td><td>${lastW}</td><td><span class="pill ${cls}">${lbl}</span></td></tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+
+  <div class="pdf-footer">
+    <div class="logo">📖 Lectura en Familia — Nivel Primaria</div>
+    <span>Generado el ${now.toLocaleDateString('es-GT',{day:'2-digit',month:'long',year:'numeric'})}</span>
+  </div>
+
+  </body></html>`;
+
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{win.print();},800);
+  toast('📄 Informe listo para imprimir / guardar como PDF');
+}
+
+// ══════════════════════════════════════════════════════
+// 🤖 GEMINI AI — integrado, sin key del usuario
+// ══════════════════════════════════════════════════════
+const GEMINI_KEY = 'AIzaSyDkMrjZieGgz7ZvpfRY5grJJizvNStSmy0';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+
+async function callGemini(prompt){
+  const res = await fetch(GEMINI_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      contents: [{parts: [{text: prompt}]}],
+      generationConfig: {temperature: 0.7, maxOutputTokens: 2000}
+    })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.candidates[0].content.parts[0].text;
+}
+
+// ══════════════════════════════════════════════════════
+// 🎵 FIREBASE STORAGE — subir audios (hasta 2 min)
+// ══════════════════════════════════════════════════════
+const STORAGE_BUCKET = 'lectura-en-familia---2026.firebasestorage.app';
+const STORAGE_URL_BASE = `https://firebasestorage.googleapis.com/v0/b/${STORAGE_BUCKET}/o`;
+
+async function subirAudioStorage(blob, path){
+  try{
+    const mimeType = blob.type || 'audio/webm';
+    const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+    const fullPath = `audios/${path}.${ext}`;
+    const encodedPath = encodeURIComponent(fullPath);
+    const res = await fetch(`${STORAGE_URL_BASE}?uploadType=media&name=${encodedPath}`, {
+      method: 'POST',
+      headers: {'Content-Type': mimeType},
+      body: blob
+    });
+    if(!res.ok) throw new Error('Storage error: ' + res.status);
+    const data = await res.json();
+    const downloadUrl = `${STORAGE_URL_BASE}/${encodedPath}?alt=media&token=${data.downloadTokens}`;
+    return downloadUrl;
+  }catch(e){
+    console.warn('Error subiendo audio a Storage:', e);
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// ✨ 1. GENERAR PREGUNTAS AUTOMÁTICAS CON IA (MINEDU)
+// ══════════════════════════════════════════════════════
+async function generateQuestionsAI(){
+  const title=document.getElementById('up-title').value.trim();
+  const content=document.getElementById('up-content').value.trim();
+  const grade=currentGrade;
+  if(!content||content.length<50){toast('⚠️ Primero escribe o pega el texto del cuento / lectura','#E65100');return;}
+  const btn=document.getElementById('btn-gen-questions');
+  const statusBox=document.getElementById('ai-gen-status');
+  btn.disabled=true;
+  statusBox.style.display='block';
+  statusBox.innerHTML=`<div class="ai-loading"><div class="ai-spinner"></div>✨ Gemini está generando preguntas según MINEDU Perú...</div>`;
+  try{
+    const prompt=`Eres un experto en comprensión lectora según el Currículo Nacional de Educación Básica (CNEB) de Perú - MINEDU.
+Dado el siguiente texto para estudiantes de ${grade}° grado de primaria, genera exactamente 6 preguntas de comprensión lectora:
+- 2 preguntas LITERALES (recuperan información explícita del texto)
+- 2 preguntas INFERENCIALES (deducen información implícita, causas, consecuencias)
+- 2 preguntas CRÍTICAS (emiten juicio, opinión personal, valoración)
+
+Texto: "${title}"
+${content}
+
+Responde ÚNICAMENTE con un JSON válido, sin texto adicional, sin bloques de código, exactamente así:
+{"preguntas":[{"nivel":"literal","texto":"..."},{"nivel":"literal","texto":"..."},{"nivel":"inferencial","texto":"..."},{"nivel":"inferencial","texto":"..."},{"nivel":"critico","texto":"..."},{"nivel":"critico","texto":"..."}]}`;
+    const raw = await callGemini(prompt);
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    // Clear existing questions and fill with AI-generated ones
+    const list=document.getElementById('questions-list');
+    list.innerHTML='';
+    parsed.preguntas.forEach((q,i)=>{
+      const row=document.createElement('div');
+      row.className='question-row';
+      row.style.animation='fadeUp .3s ease both';
+      const levelColors={literal:'#1565C0',inferencial:'#6A1B9A',critico:'#E65100'};
+      const levelLabels={literal:'Literal',inferencial:'Inferencial',critico:'Crítico'};
+      row.innerHTML=`
+        <div style="display:flex;flex-direction:column;flex:1;gap:4px">
+          <div style="display:flex;gap:6px;align-items:center">
+            <span class="q-level-badge level-${q.nivel}">${levelLabels[q.nivel]||q.nivel}</span>
+          </div>
+          <input type="text" class="q-input" data-level="${q.nivel}" value="${q.texto.replace(/"/g,'&quot;')}" style="width:100%">
+        </div>
+        <button class="btn-icon btn-del" onclick="removeQuestion(this)">🗑</button>`;
+      list.appendChild(row);
+    });
+    statusBox.innerHTML=`<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:10px;padding:10px 14px;font-size:.84rem;color:#2E7D32;font-weight:700">✅ Se generaron 6 preguntas (2 literales · 2 inferenciales · 2 críticas) según MINEDU Perú. Puedes editarlas antes de publicar.</div>`;
+    bindCursor();
+    toast('✅ Preguntas generadas con IA 🎉','#2D6A4F');
+  }catch(e){
+    console.error(e);
+    statusBox.innerHTML=`<div style="background:#FFEBEE;border:1px solid #EF9A9A;border-radius:10px;padding:10px 14px;font-size:.84rem;color:#C62828">⚠️ Error al generar preguntas. Verifica tu conexión e intenta de nuevo.</div>`;
+  }finally{btn.disabled=false;}
+}
+
+// ══════════════════════════════════════════════════════
+// 🎙️ GRABACIÓN DE AUDIO
+// ══════════════════════════════════════════════════════
+let audioBlobs={};
+let mediaRecorders={};
+let recIntervals={};
+let recSeconds={};
+
+function getBestMimeType(){
+  const types=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4','audio/mpeg',''];
+  return types.find(t=>t===''||MediaRecorder.isTypeSupported(t))||'';
+}
+
+async function toggleRecording(idx, btnEl){
+  // If already recording this idx, stop it
+  if(mediaRecorders[idx]&&mediaRecorders[idx].state==='recording'){
+    stopRecording(idx); return;
+  }
+  const btn = btnEl || document.getElementById(`btn-rec-${idx}`);
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    const mimeType=getBestMimeType();
+    const options=mimeType?{mimeType}:{};
+    const mr=new MediaRecorder(stream,options);
+    const chunks=[];
+    mr.ondataavailable=e=>{if(e.data&&e.data.size>0)chunks.push(e.data);};
+    mr.onstop=()=>{
+      const blob=new Blob(chunks,{type:mr.mimeType||'audio/webm'});
+      audioBlobs[idx]=blob;
+      const url=URL.createObjectURL(blob);
+      const prev=document.getElementById(`audio-preview-${idx}`);
+      if(prev){
+        prev.style.display='block';
+        const isReading=(idx==='reading');
+        prev.innerHTML=`<div class="audio-ok">${isReading?'✅ Lectura grabada — la maestra evaluará tu fluidez lectora':'✅ Audio grabado — escúchalo antes de enviar'}</div>
+          <audio controls src="${url}" style="width:100%;margin-top:6px;border-radius:8px"></audio>
+          <button onclick="audioBlobs['${idx}']=null;document.getElementById('audio-preview-${idx}').style.display='none'"
+            style="font-size:.72rem;color:#C62828;background:none;border:none;cursor:pointer;margin-top:4px">🗑 Descartar y volver a grabar</button>`;
+      }
+      stream.getTracks().forEach(t=>t.stop());
+      const b=document.getElementById(`btn-rec-${idx}`);
+      if(b){b.classList.remove('recording');b.innerHTML=idx==='reading'?'🎙️ Volver a grabar la lectura':'🎙️ Volver a grabar';}
+      const st=document.getElementById(`rec-status-${idx}`);
+      if(st)st.style.display='none';
+      clearInterval(recIntervals[idx]);
+    };
+    mr.start(100);
+    mediaRecorders[idx]=mr;
+    recSeconds[idx]=0;
+    const timeEl=document.getElementById(`rec-time-${idx}`);
+    recIntervals[idx]=setInterval(()=>{
+      recSeconds[idx]++;
+      const m=Math.floor(recSeconds[idx]/60),s=recSeconds[idx]%60;
+      if(timeEl)timeEl.textContent=`${m}:${s.toString().padStart(2,'0')}`;
+      if(recSeconds[idx]>=180)stopRecording(idx); // max 3 min
+    },1000);
+    const b=document.getElementById(`btn-rec-${idx}`);
+    if(b){b.classList.add('recording');b.innerHTML=`🔴 Grabando... (toca para parar)`;}
+    const st=document.getElementById(`rec-status-${idx}`);
+    if(st)st.style.display='flex';
+  }catch(e){
+    console.error('Audio error:',e);
+    if(e.name==='NotAllowedError'||e.name==='PermissionDeniedError'){
+      toast('🎙️ Permite el acceso al micrófono en tu navegador para grabar audio','#C62828');
+    } else {
+      toast('⚠️ No se pudo acceder al micrófono: '+e.message,'#C62828');
+    }
+  }
+}
+
+function stopRecording(idx){
+  try{
+    if(mediaRecorders[idx]&&mediaRecorders[idx].state==='recording'){
+      mediaRecorders[idx].stop();
+    }
+  }catch(e){console.error(e);}
+  clearInterval(recIntervals[idx]);
+}
+
+// ── Grabación de LECTURA EN VOZ ALTA ──
+async function toggleReadingRecording(){
+  const idx='reading';
+  if(mediaRecorders[idx]&&mediaRecorders[idx].state==='recording'){
+    stopRecording(idx); return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    const mimeType=getBestMimeType();
+    const options=mimeType?{mimeType}:{};
+    const mr=new MediaRecorder(stream,options);
+    const chunks=[];
+    mr.ondataavailable=e=>{if(e.data&&e.data.size>0)chunks.push(e.data);};
+    mr.onstop=()=>{
+      const blob=new Blob(chunks,{type:mr.mimeType||'audio/webm'});
+      audioBlobs[idx]=blob;
+      const url=URL.createObjectURL(blob);
+      const prev=document.getElementById('reading-audio-preview');
+      if(prev){
+        prev.style.display='block';
+        prev.innerHTML=`<div class="audio-ok">✅ Lectura grabada — la maestra la escuchará al revisar</div>
+          <audio controls src="${url}" style="width:100%;margin-top:4px;border-radius:8px"></audio>
+          <button onclick="audioBlobs['reading']=null;this.parentElement.style.display='none'"
+            style="font-size:.72rem;color:#C62828;background:none;border:none;cursor:pointer;margin-top:4px">🗑 Grabar de nuevo</button>`;
+      }
+      stream.getTracks().forEach(t=>t.stop());
+      const btn=document.getElementById('btn-reading-rec');
+      if(btn){btn.classList.remove('recording');btn.innerHTML=`<span>📖🎙️</span> <span>Volver a grabar lectura</span>`;}
+      const st=document.getElementById('reading-rec-status');
+      if(st)st.style.display='none';
+      clearInterval(recIntervals[idx]);
+      toast('✅ Lectura grabada. ¡Muy bien!','#2D6A4F');
+    };
+    mr.start(100);
+    mediaRecorders[idx]=mr;
+    recSeconds[idx]=0;
+    recIntervals[idx]=setInterval(()=>{
+      recSeconds[idx]++;
+      const m=Math.floor(recSeconds[idx]/60),s=recSeconds[idx]%60;
+      const el=document.getElementById('reading-rec-time');
+      if(el)el.textContent=`${m}:${s.toString().padStart(2,'0')}`;
+      if(recSeconds[idx]>=300)stopRecording(idx); // max 5 min para lectura
+    },1000);
+    const btn=document.getElementById('btn-reading-rec');
+    if(btn){btn.classList.add('recording');btn.innerHTML=`<span>🔴</span> <span>Grabando lectura... (toca para parar)</span>`;}
+    const st=document.getElementById('reading-rec-status');
+    if(st)st.style.display='flex';
+  }catch(e){
+    console.error(e);
+    toast('⚠️ No se pudo acceder al micrófono','#C62828');
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// 🤖 3. CORRECCIÓN AUTOMÁTICA CON IA SEGÚN MINEDU
+// ══════════════════════════════════════════════════════
+async function autoReviewWithAI(textId, respIdx){
+  const resps=familyResponses.filter(r=>r.grade===currentGrade&&r.section===currentSection&&r.textId==textId);
+  const resp=resps[respIdx];
+  if(!resp)return;
+  const textObj=getTexts().find(t=>t.id==textId);
+  if(!textObj)return;
+
+  const btnId=`btn-autoreview-${textId}-${respIdx}`;
+  const boxId=`ai-review-${textId}-${respIdx}`;
+  const btn=document.getElementById(btnId);
+  if(btn){btn.disabled=true;btn.textContent='🤖 Analizando...';}
+
+  const questionsAndAnswers=textObj.questions.map((q,i)=>{
+    const qText=q.text||q;
+    const level=q._level||'';
+    return `Pregunta ${i+1} [${level||'comprensión'}]: ${qText}\nRespuesta del estudiante: ${resp.answers[i]||'(sin respuesta escrita)'}`;
+  }).join('\n\n');
+
+  try{
+    const prompt=`Eres un docente experto en comprensión lectora según el Currículo Nacional de Educación Básica (CNEB) del MINEDU de Perú.
+
+Texto leído: "${textObj.title}"
+${textObj.content}
+
+Estudiante: ${resp.student} — Grado ${resp.grade}° de primaria
+
+${questionsAndAnswers}
+
+Evalúa las respuestas del estudiante y determina:
+1. Calificación global en la escala MINEDU: AD (Logro Destacado), A (Logro Esperado), B (En Proceso) o C (En Inicio)
+2. Nivel de comprensión lectora alcanzado según CNEB
+3. Fortalezas observadas
+4. Aspectos a mejorar
+5. Recomendación específica para la familia
+6. Recomendación pedagógica para la docente
+
+Responde ÚNICAMENTE con JSON válido sin bloques de código:
+{"calificacion":"A","nivel_comprension":"Logro Esperado","fortalezas":"...","a_mejorar":"...","recomendacion_familia":"...","recomendacion_docente":"...","comentario_breve":"..."}`;
+
+    const raw = await callGemini(prompt);
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const ai=JSON.parse(clean);
+
+    // Save to response
+    resp.ai_review=ai;
+    resp.grade_minedu=resp.grade_minedu||ai.calificacion;
+    resp.teacher_comment=resp.teacher_comment||ai.comentario_breve;
+
+    // Render in card
+    const box=document.getElementById(boxId);
+    if(box){
+      const sc=getScaleInfo(ai.calificacion);
+      box.style.display='block';
+      box.innerHTML=`
+        <div class="ai-review-title">🤖 Análisis automático IA — MINEDU Perú</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+          <div style="background:${sc.bg};border:1.5px solid ${sc.border};color:${sc.color};padding:5px 14px;border-radius:50px;font-weight:800;font-size:.88rem">${sc.code} — ${sc.label}</div>
+          <span style="font-size:.8rem;color:var(--text-light)">${ai.nivel_comprension}</span>
+        </div>
+        <div class="ai-review-item"><span class="ai-review-label">✅ Fortalezas: </span>${ai.fortalezas}</div>
+        <div class="ai-review-item"><span class="ai-review-label">📌 A mejorar: </span>${ai.a_mejorar}</div>
+        <div class="ai-review-item"><span class="ai-review-label">👨‍👩‍👦 Para la familia: </span>${ai.recomendacion_familia}</div>
+        <div class="ai-review-item"><span class="ai-review-label">🧑‍🏫 Para la docente: </span>${ai.recomendacion_docente}</div>`;
+    }
+    renderTextList();
+    toast('✅ Corrección automática completada','#2D6A4F');
+  }catch(e){
+    console.error(e);
+    if(btn){btn.disabled=false;btn.textContent='🤖 Corrección IA';}
+    toast('⚠️ Error al conectar con la IA','#C62828');
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// 📊 4. REPORTE DE PROGRESO LECTOR — MINEDU PERÚ
+// ══════════════════════════════════════════════════════
+async function openProgressReport(studentName, grade, section){
+  const modal=document.getElementById('progress-modal');
+  const content=document.getElementById('progress-report-content');
+  content.innerHTML=`<div class="ai-loading" style="justify-content:center;padding:30px"><div class="ai-spinner"></div>Generando reporte de progreso con IA...</div>`;
+  modal.classList.add('open');
+
+  const studentResps=familyResponses.filter(r=>r.student===studentName&&r.grade===grade&&r.section===section);
+  if(!studentResps.length){
+    content.innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><p>Este estudiante aún no tiene entregas registradas.</p></div>`;
+    return;
+  }
+
+  const historial=studentResps.map((r,i)=>`
+Entrega ${i+1} — Texto: "${r.text}" (Semana ${r.week||'—'})
+Calificación: ${r.grade_minedu||'Sin calificar'}
+Respuestas: ${r.answers.join(' | ')}
+${r.ai_review?`Análisis previo: ${r.ai_review.nivel_comprension} — ${r.ai_review.a_mejorar}`:''}
+  `).join('\n');
+
+  const grades=studentResps.map(r=>r.grade_minedu).filter(Boolean);
+  const scaleVal={AD:4,A:3,B:2,C:1};
+  const avgVal=grades.length?grades.reduce((s,g)=>s+(scaleVal[g]||0),0)/grades.length:0;
+  const trend=grades.length>1?(scaleVal[grades[grades.length-1]]||0)>(scaleVal[grades[0]]||0)?'mejorando':'estable':'sin tendencia';
+
+  try{
+    const prompt=`Eres especialista en comprensión lectora según el CNEB de MINEDU Perú.
+Analiza el historial de un estudiante de ${grade}° grado de primaria y genera un reporte completo.
+
+Estudiante: ${studentName}
+Historial de entregas:
+${historial}
+
+Calificaciones: ${grades.join(', ')||'ninguna aún'}
+Tendencia: ${trend}
+
+Genera un reporte detallado en JSON sin bloques de código:
+{
+  "nivel_actual": "...",
+  "descripcion_nivel": "...",
+  "comprension_literal_pct": 70,
+  "comprension_inferencial_pct": 50,
+  "comprension_critica_pct": 40,
+  "fortalezas": ["...","..."],
+  "dificultades": ["...","..."],
+  "recomendaciones_familia": ["...","...","..."],
+  "recomendaciones_docente": ["...","..."],
+  "actividades_casa": ["...","...","..."],
+  "meta_proxima_semana": "...",
+  "mensaje_motivador": "..."
+}`;
+
+    const rawResp = await callGemini(prompt);
+    const clean=rawResp.replace(/```json|```/g,'').trim();
+    const r=JSON.parse(clean);
+
+    const scaleColors={AD:'#1565C0',A:'#2E7D32',B:'#E65100',C:'#C62828'};
+    const lastGrade=grades[grades.length-1]||'—';
+    const lastColor=scaleColors[lastGrade]||'#666';
+
+    content.innerHTML=`
+      <div style="background:linear-gradient(135deg,rgba(45,106,79,.08),rgba(82,183,136,.04));border-radius:16px;padding:16px 20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700">${studentName}</div>
+          <div style="font-size:.8rem;color:var(--text-light)">${grade}° Grado · Sección ${section} · ${studentResps.length} entrega${studentResps.length!==1?'s':''}</div>
+        </div>
+        <div style="background:white;border:2px solid ${lastColor};border-radius:12px;padding:10px 18px;text-align:center">
+          <div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:${lastColor}">${lastGrade}</div>
+          <div style="font-size:.72rem;color:#666">${r.nivel_actual}</div>
+        </div>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-section-title">📊 Niveles de comprensión lectora</div>
+        ${[
+          {label:'Literal',pct:r.comprension_literal_pct,color:'#1565C0',badge:'level-literal'},
+          {label:'Inferencial',pct:r.comprension_inferencial_pct,color:'#6A1B9A',badge:'level-inferencial'},
+          {label:'Crítico',pct:r.comprension_critica_pct,color:'#E65100',badge:'level-critico'}
+        ].map(lv=>`
+          <div style="margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span class="q-level-badge ${lv.badge}">${lv.label}</span>
+              <span style="font-size:.8rem;font-weight:700;color:${lv.color}">${lv.pct}%</span>
+            </div>
+            <div style="height:12px;background:rgba(60,30,10,.08);border-radius:50px;overflow:hidden">
+              <div style="width:${lv.pct}%;height:100%;background:${lv.color};border-radius:50px;transition:width 1s ease"></div>
+            </div>
+          </div>`).join('')}
+        <p style="font-size:.8rem;color:var(--text-light);margin-top:6px;font-style:italic">${r.descripcion_nivel}</p>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-section-title">✅ Fortalezas observadas</div>
+        ${r.fortalezas.map(f=>`<div class="recommendation-item"><span>⭐</span><span>${f}</span></div>`).join('')}
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-section-title">📌 Aspectos a mejorar</div>
+        ${r.dificultades.map(d=>`<div class="recommendation-item"><span>🔧</span><span>${d}</span></div>`).join('')}
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-section-title">👨‍👩‍👦 Recomendaciones para la familia</div>
+        ${r.recomendaciones_familia.map(rec=>`<div class="recommendation-item"><span>💡</span><span>${rec}</span></div>`).join('')}
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-section-title">🏠 Actividades en casa</div>
+        ${r.actividades_casa.map(act=>`<div class="recommendation-item"><span>📚</span><span>${act}</span></div>`).join('')}
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-section-title">🧑‍🏫 Recomendaciones para la docente</div>
+        ${r.recomendaciones_docente.map(rec=>`<div class="recommendation-item"><span>🎯</span><span>${rec}</span></div>`).join('')}
+      </div>
+
+      <div style="background:linear-gradient(135deg,rgba(232,160,32,.12),rgba(245,200,66,.06));border:1.5px solid rgba(232,160,32,.3);border-radius:14px;padding:14px 18px;margin-top:4px">
+        <div style="font-size:.78rem;font-weight:800;color:var(--amber-dark);margin-bottom:4px">🎯 Meta para la próxima semana</div>
+        <div style="font-size:.88rem;color:var(--text-dark)">${r.meta_proxima_semana}</div>
+      </div>
+
+      <div style="background:linear-gradient(135deg,rgba(45,106,79,.1),rgba(82,183,136,.06));border-radius:14px;padding:14px 18px;margin-top:10px;text-align:center">
+        <div style="font-size:1.5rem;margin-bottom:6px">🌟</div>
+        <div style="font-size:.92rem;font-weight:700;color:var(--forest);font-style:italic">"${r.mensaje_motivador}"</div>
+      </div>`;
+
+  }catch(e){
+    console.error(e);
+    content.innerHTML=`<div style="padding:20px;text-align:center;color:#C62828">⚠️ Error al generar el reporte. Intenta nuevamente.</div>`;
+  }
+}
+
+function printProgressReport(){
+  const c=document.getElementById('progress-report-content');
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Reporte de Progreso Lector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>body{font-family:'Nunito',sans-serif;padding:20px;color:#1A1008;max-width:700px;margin:0 auto;}
+  @page{margin:14mm;}@media print{body{zoom:.95;}}</style></head>
+  <body><h2 style="font-family:'Playfair Display',serif;color:#2D6A4F">📖 Reporte de Progreso Lector — MINEDU Perú</h2>${c.innerHTML}</body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),600);
+}
+
+// ══ Hook: add AI review button & report button to submission cards ══
+// Override the submission card rendering to include new buttons
+const _origRenderTextList=renderTextList;
+// Patch renderTextList to inject AI review + progress report buttons
+// (We override the submissionsHTML section by patching after render)
+function injectAIButtons(){
+  document.querySelectorAll('.submission-footer').forEach(footer=>{
+    const card=footer.closest('.submission-card');
+    if(!card||card.dataset.aiInjected)return;
+    card.dataset.aiInjected='1';
+    const textId=card.id.split('-')[1];
+    const ri=card.id.split('-')[2];
+    // AI review button
+    if(!footer.querySelector('.btn-ai-inline')){
+      const b=document.createElement('button');
+      b.className='btn-ai-gen btn-ai-inline';
+      b.id=`btn-autoreview-${textId}-${ri}`;
+      b.style.cssText='font-size:.75rem;padding:6px 14px;';
+      b.textContent='🤖 Corrección IA';
+      b.onclick=()=>autoReviewWithAI(textId,parseInt(ri));
+      footer.appendChild(b);
+    }
+    // AI review result box
+    if(!document.getElementById(`ai-review-${textId}-${ri}`)){
+      const box=document.createElement('div');
+      box.id=`ai-review-${textId}-${ri}`;
+      box.className='ai-review-box';
+      box.style.display='none';
+      card.querySelector('.submission-body').appendChild(box);
+    }
+    // Progress report button
+    const nameEl=card.querySelector('.submission-name');
+    if(nameEl&&!footer.querySelector('.btn-progress')){
+      const student=nameEl.textContent;
+      const bp=document.createElement('button');
+      bp.className='btn-sm btn-edit btn-progress';
+      bp.style.cssText='font-size:.72rem;padding:5px 12px;background:#E3F2FD;color:#1565C0;border-color:#90CAF9;';
+      bp.textContent='📊 Reporte progreso';
+      bp.onclick=()=>openProgressReport(student,currentGrade,currentSection);
+      footer.appendChild(bp);
+    }
+  });
+}
+
+// Patch toggleSubmissions to inject buttons after opening
+// AI buttons injected via renderTextList patch below
+
+// ══════════════════════════════════════════════════════
+// ⭐ CELEBRACIÓN AL ENVIAR TAREA
+// ══════════════════════════════════════════════════════
+function showCelebration(studentName, streak){
+  // Confetti
+  const colors=['#FFD700','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8'];
+  for(let i=0;i<60;i++){
+    const c=document.createElement('div');
+    c.className='confetti-piece';
+    c.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${colors[Math.floor(Math.random()*colors.length)]};width:${Math.random()*12+6}px;height:${Math.random()*12+6}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${Math.random()*2+1.5}s;animation-delay:${Math.random()*.8}s;`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),(Math.random()*2+2)*1000);
+  }
+  // Modal de celebración
+  const overlay=document.createElement('div');
+  overlay.className='celebration-overlay';
+  const streakMsg=streak>=4?`🏆 ¡${streak} semanas seguidas! ¡Eres un campeón lector!`:
+                  streak>=2?`🔥 ¡${streak} semanas seguidas! ¡Sigue así!`:
+                  `🌟 ¡Primera entrega de ${studentName}!`;
+  overlay.innerHTML=`
+    <div class="celebration-box">
+      <div class="celebration-star">⭐</div>
+      <div style="font-size:2.2rem;margin:8px 0">🎉</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--forest);margin-bottom:6px">¡Muy bien, ${studentName}!</div>
+      <div style="font-size:.95rem;color:var(--text-med);margin-bottom:6px">Tu tarea fue enviada a la maestra.</div>
+      <div style="font-size:.88rem;font-weight:700;color:#FF6F00;margin-bottom:20px">${streakMsg}</div>
+      <button onclick="this.closest('.celebration-overlay').remove()"
+        style="background:linear-gradient(135deg,var(--forest),var(--forest-light));color:white;border:none;border-radius:50px;padding:12px 32px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">
+        ¡Gracias! 👍
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+  setTimeout(()=>{if(overlay.parentNode)overlay.remove();},8000);
+}
+
+// ══════════════════════════════════════════════════════
+// 🔊 TEXT-TO-SPEECH
+// ══════════════════════════════════════════════════════
+let currentUtterance=null;
+function speakText(text){
+  if(!window.speechSynthesis){toast('⚠️ Tu navegador no soporta audio','#E65100');return;}
+  window.speechSynthesis.cancel();
+  const utt=new SpeechSynthesisUtterance(text);
+  utt.lang='es-PE';utt.rate=0.88;utt.pitch=1.05;
+  // Intentar voz en español
+  const voices=window.speechSynthesis.getVoices();
+  const esVoice=voices.find(v=>v.lang.startsWith('es'))||voices[0];
+  if(esVoice)utt.voice=esVoice;
+  currentUtterance=utt;
+  window.speechSynthesis.speak(utt);
+}
+
+let audioHelpActive=false;
+const AUDIO_HELP_STEPS=[
+  '¡Hola! Te voy a explicar cómo usar esta aplicación de lectura en familia.',
+  'Primero, lee el texto que aparece en pantalla junto con tu hijo o hija.',
+  'Luego, escucha cada pregunta presionando el botón que dice Escuchar.',
+  'Tu hijo puede escribir la respuesta en el cuadro de texto, o grabar su voz con el botón de micrófono.',
+  'Cuando terminen todas las preguntas, presiona el botón verde que dice Enviar respuestas.',
+  '¡Y listo! La maestra recibirá el trabajo. ¡Gracias por leer en familia!'
+];
+let helpStepIdx=0;
+function toggleAudioHelp(){
+  const btn=document.getElementById('btn-audio-help');
+  if(audioHelpActive){
+    window.speechSynthesis.cancel();
+    audioHelpActive=false;
+    helpStepIdx=0;
+    btn.textContent='🔊 ¿Cómo usar?';
+    btn.classList.remove('speaking');
+    return;
+  }
+  audioHelpActive=true;
+  btn.classList.add('speaking');
+  btn.textContent='⏹ Detener';
+  helpStepIdx=0;
+  speakStep();
+}
+function speakStep(){
+  if(!audioHelpActive||helpStepIdx>=AUDIO_HELP_STEPS.length){
+    audioHelpActive=false;
+    const btn=document.getElementById('btn-audio-help');
+    if(btn){btn.textContent='🔊 ¿Cómo usar?';btn.classList.remove('speaking');}
+    return;
+  }
+  const utt=new SpeechSynthesisUtterance(AUDIO_HELP_STEPS[helpStepIdx]);
+  utt.lang='es-PE';utt.rate=0.85;utt.pitch=1.05;
+  const voices=window.speechSynthesis.getVoices();
+  const esVoice=voices.find(v=>v.lang.startsWith('es'))||voices[0];
+  if(esVoice)utt.voice=esVoice;
+  utt.onend=()=>{helpStepIdx++;setTimeout(speakStep,400);};
+  window.speechSynthesis.speak(utt);
+}
+
+// ══════════════════════════════════════════════════════
+// 👨‍🎓 GESTIÓN DE ESTUDIANTES
+// ══════════════════════════════════════════════════════
+const GRADE_SECTIONS_MAP={
+  '1':['A','B','C','D'],
+  '2':['A','B','C','D','E'],
+  '3':['A','B','C','D','E'],
+  '4':['A','B','C','D'],
+  '5':['A','B','C','D','E'],
+  '6':['A','B','C','D','E']
+};
+
+// Cargar estudiantes registrados desde localStorage
+let registeredStudents=(()=>{try{return JSON.parse(localStorage.getItem('lef_students')||'[]');}catch(e){return[];}})();
+function saveStudents(){try{localStorage.setItem('lef_students',JSON.stringify(registeredStudents));}catch(e){}}
+
+let editStudentIdx=null;
+
+function updateStSection(){
+  const g=document.getElementById('st-grade').value;
+  const sel=document.getElementById('st-section');
+  sel.innerHTML='<option value="">— Sección —</option>';
+  (GRADE_SECTIONS_MAP[g]||[]).forEach(s=>sel.innerHTML+=`<option>${s}</option>`);
+}
+
+function updateEditStSection(){
+  const g=document.getElementById('edit-st-grade').value;
+  const sel=document.getElementById('edit-st-section');
+  const current=sel.value;
+  sel.innerHTML='';
+  (GRADE_SECTIONS_MAP[g]||[]).forEach(s=>sel.innerHTML+=`<option${s===current?' selected':''}>${s}</option>`);
+}
+
+function addStudent(){
+  const name=document.getElementById('st-name').value.trim();
+  const grade=document.getElementById('st-grade').value;
+  const section=document.getElementById('st-section').value;
+  if(!name){toast('⚠️ Escribe el nombre del estudiante','#E65100');return;}
+  if(!grade||!section){toast('⚠️ Selecciona grado y sección','#E65100');return;}
+  // Verificar duplicado
+  const dup=registeredStudents.find(s=>
+    s.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')===
+    name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')&&
+    s.grade===grade&&s.section===section
+  );
+  if(dup){toast('⚠️ Este estudiante ya está registrado en ese grado/sección','#E65100');return;}
+  registeredStudents.push({id:Date.now(),name,grade,section});
+  saveStudents();
+  document.getElementById('st-name').value='';
+  renderStudentsList();
+  toast('✅ Estudiante agregado correctamente','#2D6A4F');
+}
+
+function renderStudentsList(){
+  const el=document.getElementById('students-list');
+  if(!el)return;
+  if(!registeredStudents.length){
+    el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text-light);font-size:.88rem;font-style:italic">Aún no hay estudiantes registrados.</div>`;
+    return;
+  }
+  // Agrupar por grado y sección
+  const sorted=[...registeredStudents].sort((a,b)=>
+    a.grade!==b.grade?a.grade.localeCompare(b.grade):
+    a.section!==b.section?a.section.localeCompare(b.section):
+    a.name.localeCompare(b.name)
+  );
+  // Agrupar
+  const groups={};
+  sorted.forEach(s=>{
+    const k=`${s.grade}°${s.section}`;
+    if(!groups[k])groups[k]=[];
+    groups[k].push(s);
+  });
+  el.innerHTML=Object.entries(groups).map(([key,arr])=>`
+    <div style="margin-bottom:16px">
+      <div style="font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--plum);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        🎒 ${key} <span style="font-size:.75rem;font-weight:600;color:var(--text-light)">${arr.length} estudiante${arr.length!==1?'s':''}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${arr.map(s=>`
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--cream);border-radius:12px;padding:10px 14px;border:1px solid rgba(107,58,111,.1)">
+            <span style="font-size:.9rem;font-weight:600;color:var(--text-dark)">👤 ${s.name}</span>
+            <div style="display:flex;gap:6px">
+              <button class="btn-sm btn-edit" onclick="openEditStudent(${s.id})" style="font-size:.72rem;padding:5px 12px">✏️ Editar</button>
+              <button class="btn-sm btn-delete" onclick="deleteStudent(${s.id})" style="font-size:.72rem;padding:5px 12px">🗑 Eliminar</button>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  bindCursor();
+}
+
+function openEditStudent(id){
+  const s=registeredStudents.find(x=>x.id===id);
+  if(!s)return;
+  editStudentIdx=id;
+  document.getElementById('edit-st-name').value=s.name;
+  const gradeEl=document.getElementById('edit-st-grade');
+  gradeEl.value=s.grade;
+  updateEditStSection();
+  document.getElementById('edit-st-section').value=s.section;
+  document.getElementById('edit-student-modal').classList.add('open');
+}
+
+function closeEditStudentModal(){
+  document.getElementById('edit-student-modal').classList.remove('open');
+  editStudentIdx=null;
+}
+
+function confirmEditStudent(){
+  const name=document.getElementById('edit-st-name').value.trim();
+  const grade=document.getElementById('edit-st-grade').value;
+  const section=document.getElementById('edit-st-section').value;
+  if(!name){toast('⚠️ Escribe el nombre','#E65100');return;}
+  const idx=registeredStudents.findIndex(x=>x.id===editStudentIdx);
+  if(idx===-1)return;
+  registeredStudents[idx]={...registeredStudents[idx],name,grade,section};
+  saveStudents();
+  closeEditStudentModal();
+  renderStudentsList();
+  toast('✅ Estudiante actualizado','#2D6A4F');
+}
+
+function deleteStudent(id){
+  if(!confirm('¿Eliminar este estudiante?'))return;
+  registeredStudents=registeredStudents.filter(s=>s.id!==id);
+  saveStudents();
+  renderStudentsList();
+  toast('🗑️ Estudiante eliminado');
+}
+
+// Verificar si un estudiante está registrado (flexible: sin tildes, sin mayúsculas)
+function normalize(str){
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+function isStudentRegistered(name,grade,section){
+  // Siempre verificar - si no hay estudiantes registrados, nadie puede ingresar
+  return registeredStudents.some(s=>
+    normalize(s.name)===normalize(name)&&
+    String(s.grade)===String(grade)&&
+    String(s.section)===String(section)
+  );
+}
+
+// ══════════════════ TOAST ══════════════════
+function toast(msg,bg){
+  const c=document.getElementById('toast-container'),t=document.createElement('div');
+  t.className='toast';if(bg)t.style.background=bg;t.textContent=msg;
+  c.appendChild(t);setTimeout(()=>t.remove(),3200);
+}
+
+// ══════════════════ INIT ══════════════════
+window.addEventListener('load',()=>{
+  const now=new Date(),y=now.getFullYear(),w=getWeek(now);
+  const el=document.getElementById('up-week');if(el)el.value=`${y}-W${String(w).padStart(2,'0')}`;
+});
+</script>
+</body>
+</html>
